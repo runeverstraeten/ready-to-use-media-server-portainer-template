@@ -26,7 +26,7 @@ The templates are based on LinuxServer.io images and are designed to be:
 1️⃣ Add the template repository  
 Open Portainer → Settings → App Templates  
 Add the following URL:  
-https://github.com/runeverstraeten/ready-to-use-media-server-portainer-template/blob/main/templates/mediaserver-compose-template.yaml
+https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml
 
 2️⃣ Go to App Templates and deploy the applications you want.
 
@@ -63,7 +63,7 @@ De templates zijn gebaseerd op LinuxServer.io images en zijn ontworpen om:
 1️⃣ Voeg de template repository toe  
 Open Portainer → Instellingen → App Templates  
 Voeg de volgende URL toe:  
-https://github.com/runeverstraeten/ready-to-use-media-server-portainer-template/blob/main/templates/mediaserver-compose-template.yaml
+https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml
 
 2️⃣ Ga naar App Templates en deploy de applicaties die je wilt.
 
