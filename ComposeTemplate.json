@@ -1,0 +1,107 @@
+{
+  "version": "2",
+  "templates": [
+    {
+      "type": 2,
+      "title": "Plex Media Server",
+      "description": "Plex Media Server (LinuxServer.io)",
+      "categories": ["Media"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Plex/icon.png",
+      "repository": {
+        "stackfile": "docker-compose.yml"
+      },
+      "env": [
+        { "name": "PUID", "label": "PUID", "default": "1000" },
+        { "name": "PGID", "label": "PGID", "default": "1000" },
+        { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" },
+        { "name": "PLEX_CONFIG", "label": "Plex config path", "default": "/docker/plex/config" },
+        { "name": "MEDIA_PATH", "label": "Media path", "default": "/media" }
+      ],
+      "stackfile": {
+        "docker-compose.yml": "version: '3.9'\nservices:\n  plex:\n    image: lscr.io/linuxserver/plex:latest\n    container_name: plex\n    network_mode: host\n    environment:\n      - PUID=${PUID}\n      - PGID=${PGID}\n      - TZ=${TZ}\n      - VERSION=docker\n    devices:\n      - /dev/dri:/dev/dri\n    volumes:\n      - ${PLEX_CONFIG}:/config\n      - ${MEDIA_PATH}:/Media\n    restart: unless-stopped"
+      }
+    },
+
+    {
+      "type": 2,
+      "title": "Transmission",
+      "description": "Transmission BitTorrent client",
+      "categories": ["Downloaders"],
+      "platform": "linux",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Transmission_Icon.svg/2048px-Transmission_Icon.svg.png",
+      "env": [
+        { "name": "PUID", "default": "1000" },
+        { "name": "PGID", "default": "1000" },
+        { "name": "TZ", "default": "Europe/Brussels" },
+        { "name": "TRANSMISSION_CONFIG", "label": "Config path", "default": "/docker/transmission/config" },
+        { "name": "DOWNLOADS_PATH", "label": "Downloads path", "default": "/media/downloads" },
+        { "name": "WEBUI_PORT", "label": "Web UI port", "default": "9091" },
+        { "name": "PEER_PORT", "label": "Peer port", "default": "51413" }
+      ],
+      "stackfile": {
+        "docker-compose.yml": "version: '3.9'\nservices:\n  transmission:\n    image: lscr.io/linuxserver/transmission:latest\n    container_name: transmission\n    environment:\n      - PUID=${PUID}\n      - PGID=${PGID}\n      - TZ=${TZ}\n    ports:\n      - ${WEBUI_PORT}:9091\n      - ${PEER_PORT}:51413/tcp\n      - ${PEER_PORT}:51413/udp\n    volumes:\n      - ${TRANSMISSION_CONFIG}:/config\n      - ${DOWNLOADS_PATH}:/downloads\n    restart: unless-stopped"
+      }
+    },
+
+    {
+      "type": 2,
+      "title": "Radarr",
+      "description": "Radarr Movie Manager",
+      "categories": ["Media"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Radarr/icon.png",
+      "env": [
+        { "name": "PUID", "default": "1000" },
+        { "name": "PGID", "default": "1000" },
+        { "name": "TZ", "default": "Europe/Brussels" },
+        { "name": "RADARR_CONFIG", "default": "/docker/radarr/config" },
+        { "name": "MEDIA_PATH", "default": "/media" },
+        { "name": "RADARR_PORT", "default": "7878" }
+      ],
+      "stackfile": {
+        "docker-compose.yml": "version: '3.9'\nservices:\n  radarr:\n    image: lscr.io/linuxserver/radarr:latest\n    container_name: radarr\n    environment:\n      - PUID=${PUID}\n      - PGID=${PGID}\n      - TZ=${TZ}\n    ports:\n      - ${RADARR_PORT}:7878\n    volumes:\n      - ${RADARR_CONFIG}:/config\n      - ${MEDIA_PATH}:/media\n    restart: unless-stopped"
+      }
+    },
+
+    {
+      "type": 2,
+      "title": "Sonarr",
+      "description": "Sonarr TV Series Manager",
+      "categories": ["Media"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Sonarr/icon.png",
+      "env": [
+        { "name": "PUID", "default": "1000" },
+        { "name": "PGID", "default": "1000" },
+        { "name": "TZ", "default": "Europe/Brussels" },
+        { "name": "SONARR_CONFIG", "default": "/docker/sonarr/config" },
+        { "name": "MEDIA_PATH", "default": "/media" },
+        { "name": "SONARR_PORT", "default": "8989" }
+      ],
+      "stackfile": {
+        "docker-compose.yml": "version: '3.9'\nservices:\n  sonarr:\n    image: lscr.io/linuxserver/sonarr:latest\n    container_name: sonarr\n    environment:\n      - PUID=${PUID}\n      - PGID=${PGID}\n      - TZ=${TZ}\n    ports:\n      - ${SONARR_PORT}:8989\n    volumes:\n      - ${SONARR_CONFIG}:/config\n      - ${MEDIA_PATH}:/media\n    restart: unless-stopped"
+      }
+    },
+
+    {
+      "type": 2,
+      "title": "Jackett",
+      "description": "Jackett Indexer Proxy",
+      "categories": ["Network"],
+      "platform": "linux",
+      "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jackett/icon.png",
+      "env": [
+        { "name": "PUID", "default": "1000" },
+        { "name": "PGID", "default": "1000" },
+        { "name": "TZ", "default": "Europe/Brussels" },
+        { "name": "JACKETT_CONFIG", "default": "/docker/jackett/config" },
+        { "name": "DOWNLOADS_PATH", "default": "/media/downloads" },
+        { "name": "JACKETT_PORT", "default": "9117" }
+      ],
+      "stackfile": {
+        "docker-compose.yml": "version: '3.9'\nservices:\n  jackett:\n    image: lscr.io/linuxserver/jackett:latest\n    container_name: jackett\n    environment:\n      - PUID=${PUID}\n      - PGID=${PGID}\n      - TZ=${TZ}\n    ports:\n      - ${JACKETT_PORT}:9117\n    volumes:\n      - ${JACKETT_CONFIG}:/config\n      - ${DOWNLOADS_PATH}:/downloads\n    restart: unless-stopped"
+      }
+    }
+  ]
+}
