@@ -33,7 +33,7 @@ The templates are based on **LinuxServer.io** images and are designed to be:
 2.  Select **"Use custom templates"**.
 3.  **Add the following URL** to the "URL" field:
     ```text
-    [https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json)
+    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json
     ```
 4.  Click **Save Settings**.
 5.  Go to **App Templates** in the left menu. You will now see the Media Server templates. Click one to deploy it.
@@ -85,7 +85,7 @@ De templates zijn gebaseerd op **LinuxServer.io** images en zijn ontworpen om:
 2.  Vink de optie **"Use custom templates"** aan.
 3.  **Voeg de volgende URL toe** aan het "URL" veld:
     ```text
-    [https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json)
+    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json
     ```
 4.  Klik op **Save Settings**.
 5.  Ga naar **App Templates** in het linkermenu. Je ziet nu de Media Server templates. Klik erop om te installeren.
