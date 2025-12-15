@@ -27,26 +27,26 @@ The templates are based on **LinuxServer.io** images and are designed to be:
 ---
 
 ### 🚀 Installation Method 1: Portainer App Templates (Single Apps)
-*Best if you want to install specific apps one by one via the "App Templates" menu.*
+*Best if you want to install specific apps one by one via the "App Templates" menu (GUI).*
 
-1.  **Open Portainer** → **Settings** → **App Templates**
-2.  **Add the following URL** to the "URL" field:
+1.  **Open Portainer** → **Settings** → **App Templates**.
+2.  Select **"Use custom templates"**.
+3.  **Add the following URL** to the "URL" field:
     ```text
-    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json
+    [https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json)
     ```
-3.  Click **Save Settings**.
-4.  Go to **App Templates** in the left menu. You will now see the Media Server templates. Click one to deploy it.
+4.  Click **Save Settings**.
+5.  Go to **App Templates** in the left menu. You will now see the Media Server templates. Click one to deploy it.
 
 ### 🚀 Installation Method 2: Portainer Stack / CasaOS (All-in-One)
 *Best if you want to deploy the entire suite at once via "Stacks" or "Custom Install".*
 
-1.  **Open Portainer** → **Stacks** → **Add Stack** (or "Custom Install" in CasaOS).
-2.  Name your stack (e.g., `media-stack`).
-3.  Copy the contents of the file from this repository following the "URL" field:
-    ```text
-    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml
-    ```
-5.  Paste it into the Web Editor.
+1.  **Open the link below** to view the raw Compose file:
+    [View mediaserver-compose-template.yaml](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml)
+2.  **Copy** the entire content of that file.
+3.  **Open Portainer** → **Stacks** → **Add Stack** (or "Custom Install" in CasaOS).
+4.  Name your stack (e.g., `media-stack`).
+5.  **Paste** the copied content into the **Web Editor**.
 6.  **Important:** Adjust the Volume paths (left side of the `:`) to match your host storage locations.
 7.  Click **Deploy the stack**.
 
@@ -79,32 +79,31 @@ De templates zijn gebaseerd op **LinuxServer.io** images en zijn ontworpen om:
 ---
 
 ### 🚀 Installatie Methode 1: Portainer App Templates (Losse Apps)
-*Het beste als je specifieke apps één voor één wilt installeren via het "App Templates" menu.*
+*Het beste als je specifieke apps één voor één wilt installeren via het "App Templates" menu (GUI).*
 
-1.  **Open Portainer** → **Settings** → **App Templates**
-2.  **Voeg de volgende URL toe** aan het "URL" veld:
+1.  **Open Portainer** → **Settings** → **App Templates**.
+2.  Vink de optie **"Use custom templates"** aan.
+3.  **Voeg de volgende URL toe** aan het "URL" veld:
     ```text
-    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json
+    [https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json)
     ```
-3.  Klik op **Save Settings**.
-4.  Ga naar **App Templates** in het linkermenu. Je ziet nu de Media Server templates. Klik erop om te installeren.
+4.  Klik op **Save Settings**.
+5.  Ga naar **App Templates** in het linkermenu. Je ziet nu de Media Server templates. Klik erop om te installeren.
 
 ### 🚀 Installatie Methode 2: Portainer Stack / CasaOS (Alles-in-één)
 *Het beste als je de volledige suite in één keer wilt deployen via "Stacks" of "Custom Install".*
 
-1.  **Open Portainer** → **Stacks** → **Add Stack** (of "Custom Install" in CasaOS).
-2.  Geef je stack een naam (bijv. `media-stack`).
-3.  Kopieer de inhoud van het bestand uit deze repository via de link in onderstaand veld.
-    ```text
-    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml
-    ```
-5.  Plak dit in de Web Editor.
+1.  **Open onderstaande link** om het ruwe Compose bestand te bekijken:
+    [Bekijk mediaserver-compose-template.yaml](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml)
+2.  **Kopieer** de volledige inhoud van dat bestand.
+3.  **Open Portainer** → **Stacks** → **Add Stack** (of "Custom Install" in CasaOS).
+4.  Geef je stack een naam (bijv. `media-stack`).
+5.  **Plak** de gekopieerde tekst in de **Web Editor**.
 6.  **Belangrijk:** Pas de Volume-paden (linkerkant van de `:`) aan naar jouw opslaglocaties.
 7.  Klik op **Deploy the stack**.
 
 ---
 
 ### 📌 Release Notes / Extra info
-* **Update:** Toegevoegd: **Overseerr** & **Tautulli** templates.
 * **Best practices:** Gebruik bij voorkeur hardlinks & correcte volume mapping om dubbele opslagruimte te voorkomen.
 * **Validatie:** De `templates.json` is gevalideerd voor compatibiliteit met Portainer CE en BE.
