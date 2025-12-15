@@ -42,10 +42,13 @@ The templates are based on **LinuxServer.io** images and are designed to be:
 
 1.  **Open Portainer** → **Stacks** → **Add Stack** (or "Custom Install" in CasaOS).
 2.  Name your stack (e.g., `media-stack`).
-3.  Copy the contents of the `[docker-compose.yaml](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml)` file from this repository.
-4.  Paste it into the Web Editor.
-5.  **Important:** Adjust the Volume paths (left side of the `:`) to match your host storage locations.
-6.  Click **Deploy the stack**.
+3.  Copy the contents of the file from this repository following the "URL" field:
+    ```text
+    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml
+    ```
+5.  Paste it into the Web Editor.
+6.  **Important:** Adjust the Volume paths (left side of the `:`) to match your host storage locations.
+7.  Click **Deploy the stack**.
 
 ---
 
