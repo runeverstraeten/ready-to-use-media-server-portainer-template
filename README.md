@@ -39,4 +39,4 @@ The templates are based on **LinuxServer.io** images and are designed to be:
 
 1. Open **Portainer**
 2. Go to **Settings → App Templates**
-3. Add the following URL: https://github.com/runeverstraeten/ready-to-use-media-server-portainer-template/blob/main/ComposeTemplate.json
+3. Add the following URL: [https://github.com/runeverstraeten/ready-to-use-media-server-portainer-template/blob/main/ComposeTemplate.json](https://github.com/runeverstraeten/ready-to-use-media-server-portainer-template/blob/main/templates/templates.json)
