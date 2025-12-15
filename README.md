@@ -112,7 +112,6 @@ De templates zijn gebaseerd op **LinuxServer.io** images en zijn ontworpen om:
 
 ---
 
-### 📌 Release Notes / Extra info
-* **v1.1.0 Update:** Toegevoegd: **Overseerr**, **Tautulli** & **Bazarr**.
+### 📌 Extra info
 * **Best practices:** Gebruik bij voorkeur hardlinks & correcte volume mapping om dubbele opslagruimte te voorkomen.
 * **Validatie:** De bestanden zijn gevalideerd voor compatibiliteit met Portainer CE en BE.
