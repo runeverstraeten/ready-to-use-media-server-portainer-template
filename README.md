@@ -32,7 +32,7 @@ The templates are based on **LinuxServer.io** images and are designed to be:
 1.  **Open Portainer** → **Settings** → **App Templates**
 2.  **Add the following URL** to the "URL" field:
     ```text
-    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/main/templates.json](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/main/templates.json
+    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json
     ```
 3.  Click **Save Settings**.
 4.  Go to **App Templates** in the left menu. You will now see the Media Server templates. Click one to deploy it.
@@ -42,7 +42,7 @@ The templates are based on **LinuxServer.io** images and are designed to be:
 
 1.  **Open Portainer** → **Stacks** → **Add Stack** (or "Custom Install" in CasaOS).
 2.  Name your stack (e.g., `media-stack`).
-3.  Copy the contents of the `docker-compose.yaml` file from this repository.
+3.  Copy the contents of the `[docker-compose.yaml](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml)` file from this repository.
 4.  Paste it into the Web Editor.
 5.  **Important:** Adjust the Volume paths (left side of the `:`) to match your host storage locations.
 6.  Click **Deploy the stack**.
@@ -81,7 +81,7 @@ De templates zijn gebaseerd op **LinuxServer.io** images en zijn ontworpen om:
 1.  **Open Portainer** → **Settings** → **App Templates**
 2.  **Voeg de volgende URL toe** aan het "URL" veld:
     ```text
-    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/main/templates.json](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/main/templates.json
+    https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json
     ```
 3.  Klik op **Save Settings**.
 4.  Ga naar **App Templates** in het linkermenu. Je ziet nu de Media Server templates. Klik erop om te installeren.
@@ -91,7 +91,7 @@ De templates zijn gebaseerd op **LinuxServer.io** images en zijn ontworpen om:
 
 1.  **Open Portainer** → **Stacks** → **Add Stack** (of "Custom Install" in CasaOS).
 2.  Geef je stack een naam (bijv. `media-stack`).
-3.  Kopieer de inhoud van het `docker-compose.yaml` bestand uit deze repository.
+3.  Kopieer de inhoud van het `[docker-compose.yaml](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml)` bestand uit deze repository.
 4.  Plak dit in de Web Editor.
 5.  **Belangrijk:** Pas de Volume-paden (linkerkant van de `:`) aan naar jouw opslaglocaties.
 6.  Klik op **Deploy the stack**.
