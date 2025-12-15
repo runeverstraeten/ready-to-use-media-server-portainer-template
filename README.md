@@ -1,4 +1,4 @@
-# 🎬 Media Server Portainer Templates
+# 🎬 Ready-to-use Media Server Portainer Templates
 
 ---
 
@@ -7,7 +7,8 @@
 This repository contains **Portainer Application Templates** for deploying a complete **self-hosted media server stack** using Docker.
 
 The templates are based on **LinuxServer.io** images and are designed to be:
-- ✔ Fully configurable (paths, ports, PUID/PGID)
+
+- ✔ Fully configurable (paths, ports, PUID / PGID)
 - ✔ Portable across different Docker hosts
 - ✔ Easy to deploy via Portainer
 - ✔ Suitable for home servers and NAS setups
@@ -16,11 +17,11 @@ The templates are based on **LinuxServer.io** images and are designed to be:
 
 ### 📦 Available Templates
 
-- Plex Media Server
-- Transmission
-- Radarr
-- Sonarr
-- Jackett
+- Plex Media Server  
+- Transmission  
+- Radarr  
+- Sonarr  
+- Jackett  
 
 ---
 
