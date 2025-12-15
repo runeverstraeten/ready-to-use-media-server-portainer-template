@@ -1,0 +1,187 @@
+[
+    {
+        "type": 1,
+        "title": "Plex",
+        "name": "plex",
+        "description": "Plex Media Server organizeert video, muziek en foto's uit persoonlijke mediabibliotheken en streamt deze naar smart TV's, mediaspelers en mobiele apparaten.",
+        "logo": "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/plex-icon.png",
+        "image": "lscr.io/linuxserver/plex:latest",
+        "categories": ["Media"],
+        "platform": "linux",
+        "restart_policy": "unless-stopped",
+        "network": "host",
+        "env": [
+            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
+            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
+            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" },
+            { "name": "VERSION", "label": "Version", "default": "docker", "description": "Docker or latest" }
+        ],
+        "volumes": [
+            { "container": "/config", "bind": "/path/to/plex/config" },
+            { "container": "/media", "bind": "/path/to/media" }
+        ],
+        "note": "Aanbevolen om Network op 'Host' te laten staan voor de beste DLNA/Discovery werking."
+    },
+    {
+        "type": 1,
+        "title": "Overseerr",
+        "name": "overseerr",
+        "description": "Overseerr is een gratis en open source applicatie voor het beheren van verzoeken voor uw mediabibliotheek. Het integreert met uw bestaande diensten, zoals Sonarr, Radarr en Plex!",
+        "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Overseerr/icon.png",
+        "image": "lscr.io/linuxserver/overseerr:latest",
+        "categories": ["Media", "Requests"],
+        "platform": "linux",
+        "restart_policy": "unless-stopped",
+        "ports": [
+            "5055/tcp"
+        ],
+        "env": [
+            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
+            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
+            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
+        ],
+        "volumes": [
+            { "container": "/config", "bind": "/path/to/overseerr/config" }
+        ]
+    },
+    {
+        "type": 1,
+        "title": "Tautulli",
+        "name": "tautulli",
+        "description": "Tautulli is een applicatie van derden die u naast uw Plex Media Server kunt uitvoeren om activiteit te controleren en diverse statistieken bij te houden.",
+        "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Tautulli/icon.png",
+        "image": "lscr.io/linuxserver/tautulli:latest",
+        "categories": ["Media", "Monitoring"],
+        "platform": "linux",
+        "restart_policy": "unless-stopped",
+        "ports": [
+            "8181/tcp"
+        ],
+        "env": [
+            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
+            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
+            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
+        ],
+        "volumes": [
+            { "container": "/config", "bind": "/path/to/tautulli/config" }
+        ]
+    },
+    {
+        "type": 1,
+        "title": "Radarr",
+        "name": "radarr",
+        "description": "Een fork van Sonarr maar dan voor films. Radarr kan films monitoren op betere versies en deze automatisch upgraden.",
+        "logo": "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/radarr-icon.png",
+        "image": "lscr.io/linuxserver/radarr:latest",
+        "categories": ["Media", "Downloaders"],
+        "platform": "linux",
+        "restart_policy": "unless-stopped",
+        "ports": [
+            "7878/tcp"
+        ],
+        "env": [
+            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
+            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
+            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
+        ],
+        "volumes": [
+            { "container": "/config", "bind": "/path/to/radarr/config" },
+            { "container": "/media", "bind": "/path/to/media" },
+            { "container": "/downloads", "bind": "/path/to/downloads" }
+        ]
+    },
+    {
+        "type": 1,
+        "title": "Sonarr",
+        "name": "sonarr",
+        "description": "Smart PVR voor nieuwsgroepen en torrents. Automatiseert het downloaden van TV-series.",
+        "logo": "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/sonarr-icon.png",
+        "image": "lscr.io/linuxserver/sonarr:latest",
+        "categories": ["Media", "Downloaders"],
+        "platform": "linux",
+        "restart_policy": "unless-stopped",
+        "ports": [
+            "8989/tcp"
+        ],
+        "env": [
+            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
+            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
+            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
+        ],
+        "volumes": [
+            { "container": "/config", "bind": "/path/to/sonarr/config" },
+            { "container": "/media", "bind": "/path/to/media" },
+            { "container": "/downloads", "bind": "/path/to/downloads" }
+        ]
+    },
+    {
+        "type": 1,
+        "title": "Bazarr",
+        "name": "bazarr",
+        "description": "Een begeleidende applicatie voor Sonarr en Radarr die ondertitels beheert en downloadt.",
+        "logo": "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/bazarr-icon.png",
+        "image": "lscr.io/linuxserver/bazarr:latest",
+        "categories": ["Media", "Subtitles"],
+        "platform": "linux",
+        "restart_policy": "unless-stopped",
+        "ports": [
+            "6767/tcp"
+        ],
+        "env": [
+            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
+            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
+            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
+        ],
+        "volumes": [
+            { "container": "/config", "bind": "/path/to/bazarr/config" },
+            { "container": "/media", "bind": "/path/to/media" }
+        ]
+    },
+    {
+        "type": 1,
+        "title": "Transmission",
+        "name": "transmission",
+        "description": "Een snelle, gemakkelijke en gratis BitTorrent-client.",
+        "logo": "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/transmission-icon.png",
+        "image": "lscr.io/linuxserver/transmission:latest",
+        "categories": ["Downloaders"],
+        "platform": "linux",
+        "restart_policy": "unless-stopped",
+        "ports": [
+            "9091/tcp",
+            "51413/tcp",
+            "51413/udp"
+        ],
+        "env": [
+            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
+            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
+            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
+        ],
+        "volumes": [
+            { "container": "/config", "bind": "/path/to/transmission/config" },
+            { "container": "/downloads", "bind": "/path/to/downloads" }
+        ]
+    },
+    {
+        "type": 1,
+        "title": "Jackett",
+        "name": "jackett",
+        "description": "API-ondersteuning voor uw favoriete torrent-trackers.",
+        "logo": "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/jackett-icon.png",
+        "image": "lscr.io/linuxserver/jackett:latest",
+        "categories": ["Downloaders", "Indexers"],
+        "platform": "linux",
+        "restart_policy": "unless-stopped",
+        "ports": [
+            "9117/tcp"
+        ],
+        "env": [
+            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
+            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
+            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
+        ],
+        "volumes": [
+            { "container": "/config", "bind": "/path/to/jackett/config" }
+        ]
+    }
+]
