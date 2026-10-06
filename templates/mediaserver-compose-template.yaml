@@ -151,6 +151,22 @@ services:
       - media_network
     restart: unless-stopped
 
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Europe/Brussels}
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/bazarr/config:/config
+      - ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
+    ports:
+      - 6767:6767
+    networks:
+      - media_network
+    restart: unless-stopped
+
   seerr:
     image: ghcr.io/seerr-team/seerr:latest
     container_name: seerr
