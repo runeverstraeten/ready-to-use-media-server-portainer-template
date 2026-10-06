@@ -241,3 +241,19 @@ services:
     networks:
       - media_network
     restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:lts
+    container_name: portainer
+    environment:
+      - TZ=${TZ}
+    ports:
+      - 8000:8000
+      - 9000:9000 # HTTP access
+      - 9443:9443 # HTTPS access
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock # Geeft Portainer toegang tot Docker
+      - ${APPDATA_DIR}/portainer/data:/data # Gebruikt jouw mapstructuur
+    networks:
+      - media_network
+    restart: unless-stopped
