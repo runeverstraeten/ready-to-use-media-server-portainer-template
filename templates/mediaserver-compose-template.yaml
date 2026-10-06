@@ -225,3 +225,19 @@ services:
     networks:
       - media_network
     restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=${TZ}
+    ports:
+      - 8191:8191
+    volumes:
+      - ${APPDATA_DIR}/flaresolverr/config:/config
+    networks:
+      - media_network
+    restart: unless-stopped
