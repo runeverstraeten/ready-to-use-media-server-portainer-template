@@ -14,27 +14,32 @@ The repository is designed to make deploying and maintaining a Docker-based medi
 
 * [🇬🇧 English](#-english)
 
+  * [About](#-about)
   * [Features](#-features)
   * [Included Applications](#-included-applications)
+  * [Media Server Workflow](#-media-server-workflow)
   * [Repository Structure](#-repository-structure)
   * [Installation](#-installation)
 
-    * [Method 1: Portainer Stack](#-method-1-portainer-stack-recommended)
-    * [Method 2: Docker Desktop](#-method-2-docker-desktop-windows--macos)
-    * [Method 3: Portainer App Templates](#-method-3-portainer-app-templates-single-apps)
+    * [Method 1: Portainer Stack](#-method-1-portainer-stack--recommended)
+    * [Method 2: Docker Desktop](#-method-2-docker-desktop--windows--macos)
+    * [Method 3: Portainer App Templates](#-method-3-portainer-app-templates--individual-apps)
   * [Environment Variables](#-environment-variables)
   * [Storage & Hardlinks](#-storage--hardlinks)
   * [Updating Containers](#-updating-containers)
   * [Security](#-security)
+  * [Troubleshooting](#-troubleshooting)
 * [🇳🇱 Nederlands](#-nederlands)
 
-  * [Kenmerken](#-kenmerken)
+  * [Over deze repository](#-over-deze-repository)
   * [Inbegrepen applicaties](#-inbegrepen-applicaties)
+  * [Werking van de mediaserver](#-werking-van-de-mediaserver)
   * [Installatie](#-installatie-1)
-  * [Omgevingsvariabelen](#-omgevingsvariabelen)
-  * [Opslag & Hardlinks](#-opslag--hardlinks)
-  * [Containers bijwerken](#-containers-bijwerken)
-  * [Beveiliging](#-beveiliging)
+  * [Omgevingsvariabelen](#-omgevingsvariabelen-1)
+  * [Opslag & Hardlinks](#-opslag--hardlinks-1)
+  * [Containers bijwerken](#-containers-bijwerken-1)
+  * [Beveiliging](#-beveiliging-1)
+* [🤝 Contributing](#-contributing)
 * [📄 License](#-license)
 
 ---
@@ -56,6 +61,7 @@ The templates are heavily based on images from **LinuxServer.io** and are design
 * ✔ **Compatible with CasaOS**
 * ✔ **Compatible with Docker Desktop**
 * ✔ **Designed with persistent configuration storage in mind**
+* ✔ **Suitable for automated media management**
 
 You can either deploy the complete media stack at once or install individual applications through Portainer's **App Templates**.
 
@@ -79,6 +85,14 @@ The same Compose files can be used on different Docker hosts by changing the env
 
 Application configuration is stored outside the containers, allowing containers to be recreated or updated without losing their settings.
 
+### Automated media management
+
+The stack combines request management, indexer management, downloading, media organization and subtitle management into one integrated workflow.
+
+### Subtitle automation
+
+**Bazarr** automatically searches for and downloads subtitles for movies and TV shows managed by Radarr and Sonarr.
+
 ### Hardlink-friendly storage layout
 
 The stack is designed around a shared `/DATA` directory structure, allowing applications such as Sonarr and Radarr to create hardlinks between downloads and the final media library.
@@ -97,10 +111,63 @@ The stack is designed around a shared `/DATA` directory structure, allowing appl
 | **Seerr**             | Media request management            |
 | **Radarr**            | Movie management                    |
 | **Sonarr**            | TV series management                |
+| **Bazarr**            | Automatic subtitle management       |
 | **Prowlarr**          | Indexer management                  |
 | **Transmission**      | Torrent client                      |
 
-### Application overview
+### Application roles
+
+#### 🎬 Media Servers
+
+* **Jellyfin**
+* **Plex Media Server**
+
+Used to stream and manage your media library.
+
+#### 📊 Monitoring
+
+* **Jellystat**
+* **Tautulli**
+
+Used for statistics, monitoring and usage information.
+
+#### 📥 Media Management
+
+* **Radarr** — Movies
+* **Sonarr** — TV Shows
+* **Bazarr** — Subtitles
+
+Radarr and Sonarr organize your downloaded media, while Bazarr automatically searches for matching subtitles.
+
+#### 🔎 Indexer Management
+
+* **Prowlarr**
+
+Prowlarr manages indexers and integrates with applications such as Radarr and Sonarr.
+
+#### 📡 Downloading
+
+* **Transmission**
+
+Transmission handles torrent downloads.
+
+#### 📋 Requests
+
+* **Seerr**
+
+Seerr provides a user-friendly interface for requesting movies and TV shows.
+
+#### 🗄️ Database
+
+* **PostgreSQL**
+
+PostgreSQL provides the database backend required by Jellystat.
+
+---
+
+# 🔄 Media Server Workflow
+
+The stack is designed around an automated media workflow:
 
 ```text
                          ┌───────────────┐
@@ -108,14 +175,15 @@ The stack is designed around a shared `/DATA` directory structure, allowing appl
                          │ Media Requests│
                          └───────┬───────┘
                                  │
-                    ┌────────────┴────────────┐
-                    │                         │
-              ┌─────▼─────┐             ┌────▼─────┐
-              │   Radarr  │             │  Sonarr  │
-              │   Movies  │             │ TV Series│
-              └─────┬─────┘             └────┬─────┘
-                    │                         │
-                    └────────────┬────────────┘
+                         ┌───────▼───────┐
+                         │    Radarr     │
+                         │    Movies     │
+                         └───────┬───────┘
+                                 │
+                         ┌───────▼───────┐
+                         │     Sonarr    │
+                         │   TV Series   │
+                         └───────┬───────┘
                                  │
                          ┌───────▼───────┐
                          │    Prowlarr   │
@@ -127,17 +195,37 @@ The stack is designed around a shared `/DATA` directory structure, allowing appl
                          │ Torrent Client│
                          └───────┬───────┘
                                  │
-                         ┌───────▼───────┐
+                                 ▼
+                         ┌───────────────┐
                          │     /DATA     │
                          │   Downloads   │
-                         │     Media     │
+                         └───────┬───────┘
+                                 │
+                    ┌────────────┴────────────┐
+                    │                         │
+                    ▼                         ▼
+              ┌───────────┐             ┌───────────┐
+              │  Radarr   │             │  Sonarr   │
+              │   Movies  │             │ TV Series │
+              └─────┬─────┘             └─────┬─────┘
+                    │                         │
+                    └────────────┬────────────┘
+                                 │
+                         ┌───────▼───────┐
+                         │    Bazarr     │
+                         │   Subtitles   │
+                         └───────┬───────┘
+                                 │
+                                 ▼
+                         ┌───────────────┐
+                         │ Media Library │
                          └───────┬───────┘
                                  │
                     ┌────────────┴────────────┐
                     │                         │
               ┌─────▼─────┐             ┌────▼─────┐
               │  Jellyfin │             │   Plex   │
-              │  Server   │             │  Server  │
+              │   Server  │             │  Server  │
               └─────┬─────┘             └────┬─────┘
                     │                         │
               ┌─────▼─────┐             ┌────▼─────┐
@@ -150,9 +238,46 @@ The stack is designed around a shared `/DATA` directory structure, allowing appl
               └────────────┘
 ```
 
+### Workflow summary
+
+```text
+Seerr
+  │
+  ├── Request Movie ──→ Radarr
+  │
+  └── Request TV ─────→ Sonarr
+                            │
+                            ▼
+                        Prowlarr
+                            │
+                            ▼
+                      Transmission
+                            │
+                            ▼
+                       Downloads
+                            │
+                 ┌──────────┴──────────┐
+                 ▼                     ▼
+              Radarr                 Sonarr
+                 │                     │
+                 └──────────┬──────────┘
+                            ▼
+                          Bazarr
+                            │
+                            ▼
+                       Subtitles
+                            │
+                            ▼
+                       Media Library
+                            │
+                   ┌────────┴────────┐
+                   ▼                 ▼
+                Jellyfin            Plex
+```
+
 ---
 
-## 📁 Repository Structure
+# 📁 Repository Structure
 
 The repository contains the following main deployment files:
 
@@ -242,12 +367,19 @@ The most important variables are:
 | `APPDATA_DIR`       | Root directory for application configuration | `/DATA/AppData`            |
 | `MEDIA_DIR`         | Location of the media library                | `/mnt/media_storage/Media` |
 | `DATA_DIR`          | Root directory used for downloads/media      | `/DATA`                    |
+| `POSTGRES_USER`     | PostgreSQL username                          | `postgres`                 |
 | `POSTGRES_PASSWORD` | PostgreSQL password for Jellystat            | `Use-a-secure-password`    |
 | `JWT_SECRET`        | Secret used by Jellystat                     | Random 64-character string |
 | `PLEX_CLAIM`        | Plex claim token                             | `claim-xxxxxxxx`           |
 | `PUID`              | Linux user ID                                | `1000`                     |
 | `PGID`              | Linux group ID                               | `1000`                     |
 | `TZ`                | Time zone                                    | `Europe/Brussels`          |
+
+**Bazarr does not require a separate host path variable.** It uses the shared `MEDIA_DIR` and stores its configuration under:
+
+```text
+${APPDATA_DIR}/bazarr/config
+```
 
 ### 6. Deploy
 
@@ -257,7 +389,7 @@ Click:
 Deploy the stack
 ```
 
-Portainer will create the containers and associated resources.
+Portainer will create the complete stack, including Bazarr.
 
 ---
 
@@ -296,6 +428,7 @@ APPDATA_DIR=C:\Docker\AppData
 MEDIA_DIR=D:\Media
 DATA_DIR=D:\Downloads
 
+POSTGRES_USER=postgres
 POSTGRES_PASSWORD=MySecurePassword123
 JWT_SECRET=your-random-secret-string
 PLEX_CLAIM=claim-xxxxxxxxx
@@ -379,7 +512,7 @@ App Templates
 
 The available media server templates should now be displayed.
 
-You can install the applications individually through the Portainer GUI.
+This includes **Bazarr**, which can be installed independently if required.
 
 ---
 
@@ -407,11 +540,12 @@ Example:
 /DATA/AppData/
 ├── jellyfin/
 ├── plex/
-├── jellystat/
 ├── tautulli/
-├── seerr/
+├── jellystat/
 ├── radarr/
 ├── sonarr/
+├── bazarr/
+├── seerr/
 ├── prowlarr/
 └── transmission/
 ```
@@ -436,6 +570,8 @@ Media/
 ├── TV Shows/
 └── Music/
 ```
+
+Bazarr uses this location to access the movies and TV shows for which it manages subtitles.
 
 ---
 
@@ -511,6 +647,18 @@ TZ=Europe/Brussels
 
 ---
 
+### `POSTGRES_USER`
+
+PostgreSQL username used by Jellystat.
+
+Default:
+
+```dotenv
+POSTGRES_USER=postgres
+```
+
+---
+
 ### `POSTGRES_PASSWORD`
 
 Password used by the PostgreSQL database for Jellystat.
@@ -545,17 +693,90 @@ Plex provides a temporary claim token for linking a new Plex server to your acco
 
 Generate a fresh token through:
 
-```text
-https://www.plex.tv/claim/
-```
+**[plex.tv/claim](https://www.plex.tv/claim/)**
 
 The token is only valid for a limited amount of time, so generate it shortly before deploying the Plex container.
 
 ---
 
+# 💬 Bazarr — Subtitle Management
+
+**Bazarr** is included in the stack specifically for automated subtitle management.
+
+It works together with **Sonarr** and **Radarr**.
+
+### What Bazarr does
+
+Bazarr can automatically:
+
+* Search for subtitles
+* Download subtitles
+* Manage subtitles for movies
+* Manage subtitles for TV episodes
+* Integrate with Sonarr
+* Integrate with Radarr
+* Use configured subtitle providers
+* Automatically search for missing subtitles
+
+### Bazarr configuration
+
+Bazarr stores its configuration in:
+
+```text
+${APPDATA_DIR}/bazarr/config
+```
+
+The media directory is mounted as:
+
+```text
+${MEDIA_DIR}:/media
+```
+
+This gives Bazarr access to the media library.
+
+### Default web interface
+
+Bazarr is exposed on:
+
+```text
+http://YOUR-SERVER-IP:6767
+```
+
+For example:
+
+```text
+http://192.168.0.2:6767
+```
+
+### Integration
+
+After installing Bazarr, configure:
+
+```text
+Bazarr
+→ Settings
+→ Sonarr
+```
+
+and:
+
+```text
+Bazarr
+→ Settings
+→ Radarr
+```
+
+Add the corresponding Sonarr and Radarr instances and API keys.
+
+Bazarr can then automatically monitor your library and download missing subtitles.
+
+> **Tip:** Use the same `/media` path consistently when configuring integrations where possible. This avoids path mapping problems between containers.
+
+---
+
 # 💾 Storage & Hardlinks
 
-One of the most important considerations when setting up Sonarr, Radarr and a torrent client is the storage structure.
+One of the most important considerations when setting up Sonarr, Radarr and Transmission is the storage structure.
 
 A properly configured directory layout allows **hardlinks** to be used.
 
@@ -582,6 +803,18 @@ Keep downloads and media on the **same filesystem** and preferably underneath th
 
 ```text
 /DATA/
+├── AppData/
+│   ├── jellyfin/
+│   ├── plex/
+│   ├── radarr/
+│   ├── sonarr/
+│   ├── bazarr/
+│   ├── seerr/
+│   ├── prowlarr/
+│   ├── transmission/
+│   ├── tautulli/
+│   └── jellystat/
+│
 ├── Downloads/
 │   └── torrents/
 │       ├── movies/
@@ -596,13 +829,28 @@ Then ensure the relevant containers see the directories using compatible paths.
 
 > **Important:** Hardlinks generally require the source and destination to be on the same filesystem. Crossing filesystem boundaries will prevent hardlinks from working.
 
+### Container paths
+
+The stack uses the following important paths:
+
+| Container    | Downloads/Data | Media    |
+| ------------ | -------------- | -------- |
+| Transmission | `/data`        | `/media` |
+| Radarr       | `/data`        | `/media` |
+| Sonarr       | `/data`        | `/media` |
+| Bazarr       | —              | `/media` |
+| Jellyfin     | —              | `/media` |
+| Plex         | —              | `/media` |
+
+This gives the media management applications a consistent view of the underlying storage.
+
 ---
 
 # 🔄 Updating Containers
 
 Container configuration is stored outside the containers through the configured application data directory.
 
-This means containers can be recreated or updated without losing their configuration.
+This means containers can be recreated or updated without losing their settings.
 
 In Portainer, you can update a stack/container by using the appropriate **Recreate** or **Update the stack** functionality and enabling:
 
@@ -626,7 +874,13 @@ Then recreate the containers:
 docker compose up -d
 ```
 
-To remove unused Docker resources afterward:
+To check the current status:
+
+```bash
+docker compose ps
+```
+
+To remove unused Docker resources:
 
 ```bash
 docker system prune
@@ -713,6 +967,56 @@ df -h
 
 ---
 
+## Bazarr cannot find my media
+
+Check the Bazarr volume mapping:
+
+```yaml
+- ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
+```
+
+Bazarr must be able to access the same media files that Sonarr and Radarr manage.
+
+Also verify that the paths configured inside Bazarr match the paths available inside the containers.
+
+For example:
+
+```text
+Bazarr:
+    /media
+
+Sonarr:
+    /media
+
+Radarr:
+    /media
+```
+
+Using consistent container paths makes integration significantly easier.
+
+---
+
+## Bazarr cannot connect to Sonarr or Radarr
+
+Verify that all three containers are connected to:
+
+```text
+media_network
+```
+
+The containers can then communicate using their Docker service/container names.
+
+For example:
+
+```text
+http://sonarr:8989
+http://radarr:7878
+```
+
+instead of relying on the host IP address.
+
+---
+
 ## Container configuration disappeared
 
 Make sure your configuration directories are mapped to a persistent location such as:
@@ -742,25 +1046,145 @@ De templates zijn grotendeels gebaseerd op images van **LinuxServer.io** en zijn
 * ✔ **Geschikt** te zijn voor CasaOS
 * ✔ **Compatibel** te zijn met Docker Desktop
 * ✔ **Persistente configuratie** te gebruiken
-
-Je kunt de volledige mediaserver in één keer deployen via een Stack, of afzonderlijke applicaties installeren via Portainer App Templates.
+* ✔ **Geautomatiseerd mediabeheer** mogelijk te maken
+* ✔ **Automatisch ondertitels te downloaden** via Bazarr
 
 ---
 
 ## 📦 Inbegrepen applicaties
 
-| Applicatie            | Functie                            |
-| --------------------- | ---------------------------------- |
-| **Jellyfin**          | Open-source mediaserver            |
-| **Plex Media Server** | Mediaserver met host network mode  |
-| **Jellystat**         | Jellyfin monitoring & statistieken |
-| **PostgreSQL**        | Database voor Jellystat            |
-| **Tautulli**          | Plex monitoring & statistieken     |
-| **Seerr**             | Beheer van mediaverzoeken          |
-| **Radarr**            | Filmbeheer                         |
-| **Sonarr**            | TV-seriebeheer                     |
-| **Prowlarr**          | Indexerbeheer                      |
-| **Transmission**      | Torrentclient                      |
+| Applicatie            | Functie                                          |
+| --------------------- | ------------------------------------------------ |
+| **Jellyfin**          | Open-source mediaserver                          |
+| **Plex Media Server** | Mediaserver met host network mode                |
+| **Jellystat**         | Jellyfin monitoring & statistieken               |
+| **PostgreSQL**        | Database voor Jellystat                          |
+| **Tautulli**          | Plex monitoring & statistieken                   |
+| **Seerr**             | Beheer van mediaverzoeken                        |
+| **Radarr**            | Filmbeheer                                       |
+| **Sonarr**            | TV-seriebeheer                                   |
+| **Bazarr**            | Automatisch beheer en downloaden van ondertitels |
+| **Prowlarr**          | Indexerbeheer                                    |
+| **Transmission**      | Torrentclient                                    |
+
+### Rollen van de applicaties
+
+#### 🎬 Mediaservers
+
+* **Jellyfin**
+* **Plex**
+
+Voor het afspelen en streamen van films, series en andere media.
+
+#### 📊 Monitoring
+
+* **Jellystat**
+* **Tautulli**
+
+Voor statistieken en monitoring van het mediagebruik.
+
+#### 📥 Mediabeheer
+
+* **Radarr** — Films
+* **Sonarr** — TV-series
+* **Bazarr** — Ondertitels
+
+Radarr en Sonarr beheren de mediabibliotheek. Bazarr zorgt voor het automatisch zoeken en downloaden van ontbrekende ondertitels.
+
+#### 🔎 Indexerbeheer
+
+* **Prowlarr**
+
+Prowlarr beheert indexers en integreert met Radarr en Sonarr.
+
+#### 📡 Downloaden
+
+* **Transmission**
+
+Transmission verzorgt het downloaden van torrents.
+
+#### 📋 Aanvragen
+
+* **Seerr**
+
+Seerr biedt een gebruiksvriendelijke interface waarmee gebruikers films en series kunnen aanvragen.
+
+#### 🗄️ Database
+
+* **PostgreSQL**
+
+PostgreSQL wordt gebruikt als database voor Jellystat.
+
+---
+
+# 🔄 Werking van de mediaserver
+
+De stack is opgebouwd rond een grotendeels geautomatiseerde workflow:
+
+```text
+                         ┌───────────────┐
+                         │     Seerr     │
+                         │  Aanvragen    │
+                         └───────┬───────┘
+                                 │
+                         ┌───────▼───────┐
+                         │    Radarr     │
+                         │    Films      │
+                         └───────┬───────┘
+                                 │
+                         ┌───────▼───────┐
+                         │    Sonarr     │
+                         │  TV-series    │
+                         └───────┬───────┘
+                                 │
+                         ┌───────▼───────┐
+                         │   Prowlarr    │
+                         │    Indexers   │
+                         └───────┬───────┘
+                                 │
+                         ┌───────▼───────┐
+                         │  Transmission │
+                         │ Torrentclient │
+                         └───────┬───────┘
+                                 │
+                                 ▼
+                         ┌───────────────┐
+                         │   Downloads   │
+                         └───────┬───────┘
+                                 │
+                    ┌────────────┴────────────┐
+                    │                         │
+                    ▼                         ▼
+                 Radarr                    Sonarr
+                    │                         │
+                    └────────────┬────────────┘
+                                 │
+                         ┌───────▼───────┐
+                         │    Bazarr     │
+                         │  Ondertitels  │
+                         └───────┬───────┘
+                                 │
+                                 ▼
+                         ┌───────────────┐
+                         │  Medialibrary │
+                         └───────┬───────┘
+                                 │
+                    ┌────────────┴────────────┐
+                    │                         │
+              ┌─────▼─────┐             ┌────▼─────┐
+              │  Jellyfin │             │   Plex   │
+              │   Server  │             │  Server  │
+              └─────┬─────┘             └────┬─────┘
+                    │                         │
+              ┌─────▼─────┐             ┌────▼─────┐
+              │ Jellystat │             │ Tautulli │
+              │ Statistiek│             │Statistiek│
+              └─────┬─────┘             └──────────┘
+                    │
+              ┌─────▼──────┐
+              │ PostgreSQL │
+              └────────────┘
+```
 
 ---
 
@@ -816,6 +1240,7 @@ Belangrijke variabelen zijn:
 APPDATA_DIR
 MEDIA_DIR
 DATA_DIR
+POSTGRES_USER
 POSTGRES_PASSWORD
 JWT_SECRET
 PLEX_CLAIM
@@ -830,10 +1255,25 @@ Bijvoorbeeld:
 APPDATA_DIR=/DATA/AppData
 MEDIA_DIR=/mnt/media_storage/Media
 DATA_DIR=/DATA
+POSTGRES_USER=postgres
 PUID=1000
 PGID=1000
 TZ=Europe/Brussels
 ```
+
+Bazarr gebruikt automatisch:
+
+```text
+${APPDATA_DIR}/bazarr/config
+```
+
+voor zijn configuratie en:
+
+```text
+${MEDIA_DIR}:/media
+```
+
+voor toegang tot de mediamap.
 
 ### 6. Deploy
 
@@ -843,143 +1283,87 @@ Klik op:
 Deploy the stack
 ```
 
-Portainer zal vervolgens de benodigde containers aanmaken.
+De volledige stack wordt vervolgens aangemaakt, inclusief Bazarr.
 
 ---
 
-# 💻 Methode 2: Docker Desktop — Windows / macOS
+# 💬 Bazarr — Ondertiteling
 
-Gebruik deze methode wanneer je Docker via Docker Desktop gebruikt.
+**Bazarr** is verantwoordelijk voor het automatisch beheren en downloaden van ondertitels voor films en series.
 
-### 1. Plaats het Compose-bestand
+Bazarr werkt samen met:
+
+* **Radarr** voor films
+* **Sonarr** voor TV-series
+
+### Wat doet Bazarr?
+
+Bazarr kan:
+
+* automatisch ontbrekende ondertitels zoeken;
+* ondertitels downloaden;
+* ondertitels voor films beheren;
+* ondertitels voor afleveringen beheren;
+* integreren met Sonarr;
+* integreren met Radarr;
+* verschillende subtitle providers gebruiken;
+* je bibliotheek automatisch controleren op ontbrekende ondertitels.
+
+### Configuratie
+
+De configuratie wordt opgeslagen in:
+
+```text
+/DATA/AppData/bazarr/config
+```
+
+De mediamap wordt gemount als:
+
+```text
+/media
+```
+
+Bazarr is standaard bereikbaar via:
+
+```text
+http://YOUR-SERVER-IP:6767
+```
 
 Bijvoorbeeld:
 
 ```text
-media-server/
-├── docker-compose.yaml
-└── .env
+http://192.168.0.2:6767
 ```
 
-### 2. Maak `.env` aan
+### Integratie met Sonarr en Radarr
 
-Maak in dezelfde map een bestand met de naam:
+Na installatie configureer je in Bazarr:
 
 ```text
-.env
+Settings
+→ Sonarr
 ```
 
-### 3. Voeg je configuratie toe
-
-Bijvoorbeeld:
-
-```dotenv
-APPDATA_DIR=C:\Docker\AppData
-MEDIA_DIR=D:\Media
-DATA_DIR=D:\Downloads
-
-POSTGRES_PASSWORD=MijnVeiligWachtwoord123
-JWT_SECRET=een-random-geheime-string
-PLEX_CLAIM=claim-xxxxxxxxx
-
-PUID=1000
-PGID=1000
-TZ=Europe/Brussels
-```
-
-### 4. Open een terminal
-
-Ga naar de map:
-
-```bash
-cd /path/to/media-server
-```
-
-### 5. Start de containers
-
-```bash
-docker compose up -d
-```
-
-Controleer vervolgens de status:
-
-```bash
-docker compose ps
-```
-
----
-
-# 🧩 Methode 3: Portainer App Templates — Losse apps
-
-Deze methode is handig wanneer je slechts bepaalde applicaties wilt installeren.
-
-### 1. Open Portainer
-
-Ga naar:
+en:
 
 ```text
-Portainer
-→ Settings
-→ App Templates
+Settings
+→ Radarr
 ```
 
-### 2. Gebruik Custom Templates
-
-Selecteer:
+Gebruik hierbij de Docker-servicenamen wanneer de containers op hetzelfde Docker-netwerk staan:
 
 ```text
-Use custom templates
+Sonarr:
+http://sonarr:8989
+
+Radarr:
+http://radarr:7878
 ```
 
-### 3. Voeg de template-URL toe
+Voeg vervolgens de API-key van Sonarr en Radarr toe.
 
-Gebruik:
-
-```text
-https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json
-```
-
-### 4. Sla de instellingen op
-
-Klik op:
-
-```text
-Save Settings
-```
-
-### 5. Installeer applicaties
-
-Ga vervolgens naar:
-
-```text
-App Templates
-```
-
-Je kunt nu de afzonderlijke mediaserver-applicaties installeren.
-
----
-
-# ⚙️ Omgevingsvariabelen
-
-De belangrijkste variabelen zijn:
-
-| Variabele           | Betekenis                    | Voorbeeld                  |
-| ------------------- | ---------------------------- | -------------------------- |
-| `APPDATA_DIR`       | Configuratiemappen           | `/DATA/AppData`            |
-| `MEDIA_DIR`         | Mediamap                     | `/mnt/media_storage/Media` |
-| `DATA_DIR`          | Hoofdmap voor data/downloads | `/DATA`                    |
-| `POSTGRES_PASSWORD` | PostgreSQL-wachtwoord        | Sterk uniek wachtwoord     |
-| `JWT_SECRET`        | Jellystat secret             | Willekeurige string        |
-| `PLEX_CLAIM`        | Plex claim token             | `claim-xxxxxxxx`           |
-| `PUID`              | Linux User ID                | `1000`                     |
-| `PGID`              | Linux Group ID               | `1000`                     |
-| `TZ`                | Tijdzone                     | `Europe/Brussels`          |
-
-Je kunt je Linux UID en GID controleren met:
-
-```bash
-id
-```
+Bazarr kan daarna automatisch controleren welke films en afleveringen nog geen geschikte ondertiteling hebben.
 
 ---
 
@@ -994,30 +1378,45 @@ Een aanbevolen structuur is:
 ├── AppData/
 ├── Downloads/
 │   └── torrents/
+│       ├── movies/
+│       └── tv/
 └── Media/
     ├── Movies/
     └── TV Shows/
 ```
 
-Door `/DATA` correct beschikbaar te maken voor de relevante containers, kunnen Sonarr en Radarr hardlinks gebruiken.
+Door `/DATA` correct beschikbaar te maken voor Transmission, Sonarr en Radarr, kunnen hardlinks worden gebruikt.
 
-### Voordelen van hardlinks
+### Waarom hardlinks?
 
 Zonder hardlinks kan een gedownload bestand volledig worden gekopieerd naar de uiteindelijke mediamap.
 
-Met hardlinks kunnen beide locaties naar dezelfde fysieke data verwijzen.
+Met hardlinks kunnen meerdere bestandspaden naar dezelfde fysieke data verwijzen.
 
-Dit voorkomt onnodig dubbel opslaggebruik.
+Hierdoor wordt onnodig dubbel opslaggebruik voorkomen.
 
-> **Let op:** downloads en media moeten zich hiervoor doorgaans op hetzelfde filesystem bevinden.
+> **Let op:** downloads en media moeten zich hiervoor op hetzelfde filesystem bevinden.
+
+### Container-mounts
+
+| Container    | Data/Downloads | Media    |
+| ------------ | -------------- | -------- |
+| Transmission | `/data`        | `/media` |
+| Radarr       | `/data`        | `/media` |
+| Sonarr       | `/data`        | `/media` |
+| Bazarr       | —              | `/media` |
+| Jellyfin     | —              | `/media` |
+| Plex         | —              | `/media` |
+
+Door dezelfde `/media`-structuur te gebruiken in de verschillende containers worden padproblemen tussen Radarr, Sonarr, Bazarr, Jellyfin en Plex zoveel mogelijk voorkomen.
 
 ---
 
 # 🔄 Containers bijwerken
 
-Omdat de configuratie buiten de containers wordt opgeslagen, kunnen containers veilig opnieuw worden aangemaakt zonder hun configuratie te verliezen.
+Omdat de configuratie buiten de containers wordt opgeslagen, kunnen containers opnieuw worden aangemaakt zonder hun configuratie te verliezen.
 
-In Portainer kun je bij het opnieuw aanmaken van een container/stack kiezen voor:
+In Portainer kun je bij het opnieuw aanmaken kiezen voor:
 
 ```text
 Recreate
@@ -1036,6 +1435,12 @@ docker compose pull
 docker compose up -d
 ```
 
+Controleer daarna de containers:
+
+```bash
+docker compose ps
+```
+
 ---
 
 # 🔐 Beveiliging
@@ -1044,12 +1449,12 @@ Commit nooit gevoelige informatie naar GitHub.
 
 Dit omvat onder andere:
 
-* Wachtwoorden
-* PostgreSQL credentials
+* PostgreSQL-wachtwoorden
 * JWT secrets
 * Plex claim tokens
 * API keys
 * Access tokens
+* Gebruikersnamen/wachtwoorden
 
 Wanneer je Docker Desktop gebruikt, bewaar deze informatie in `.env` en voeg `.env` toe aan `.gitignore`:
 
@@ -1057,69 +1462,135 @@ Wanneer je Docker Desktop gebruikt, bewaar deze informatie in `.env` en voeg `.e
 .env
 ```
 
-Gebruik daarnaast sterke, unieke wachtwoorden en stel diensten niet zonder verdere beveiligingsmaatregelen rechtstreeks bloot aan het internet.
+Gebruik sterke en unieke wachtwoorden.
+
+Wanneer je diensten van buiten je lokale netwerk beschikbaar maakt, gebruik dan geschikte beveiligingsmaatregelen zoals HTTPS, authenticatie en eventueel een reverse proxy.
 
 ---
 
-# 📌 Best Practices
+# 🛠️ Troubleshooting
 
-## 1. Gebruik persistente configuratie
+## Permission denied
 
-Bewaar applicatieconfiguratie buiten de containers:
-
-```text
-/DATA/AppData
-```
-
-Zo blijft de configuratie behouden wanneer containers worden verwijderd of opnieuw aangemaakt.
-
-## 2. Gebruik een consistente opslagstructuur
-
-Bijvoorbeeld:
-
-```text
-/DATA/
-├── AppData/
-├── Downloads/
-│   └── torrents/
-└── Media/
-    ├── Movies/
-    └── TV Shows/
-```
-
-Dit maakt beheer en hardlinks eenvoudiger.
-
-## 3. Gebruik correcte PUID / PGID
-
-Controleer met:
+Controleer je UID en GID:
 
 ```bash
 id
 ```
 
-en gebruik de juiste waarden in je Docker-configuratie.
-
-## 4. Gebruik sterke secrets
-
-Gebruik voor:
+Bijvoorbeeld:
 
 ```text
-POSTGRES_PASSWORD
-JWT_SECRET
+uid=1000(user) gid=1000(user)
 ```
 
-altijd unieke en voldoende lange waarden.
+Gebruik vervolgens:
 
-## 5. Update images regelmatig
+```dotenv
+PUID=1000
+PGID=1000
+```
 
-Controleer regelmatig of er nieuwe versies van de gebruikte images beschikbaar zijn.
+Controleer ook of de Docker-gebruiker toegang heeft tot de ingestelde mappen.
 
-Bij Docker Compose:
+---
+
+## Hardlinks werken niet
+
+Controleer:
+
+1. Of downloads en media op hetzelfde filesystem staan.
+2. Of de containers consistente mount paths gebruiken.
+3. Of de Docker-gebruiker voldoende rechten heeft.
+4. Of Sonarr/Radarr niet naar een ander filesystem schrijven.
+
+Controleer je filesystems met:
 
 ```bash
-docker compose pull
-docker compose up -d
+df -h
 ```
+
+---
+
+## Bazarr kan mijn media niet vinden
+
+Controleer of Bazarr de volgende volume mapping gebruikt:
+
+```yaml
+- ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
+```
+
+Controleer daarnaast of Sonarr en Radarr dezelfde `/media`-structuur gebruiken.
+
+Aanbevolen:
+
+```text
+Bazarr → /media
+Sonarr → /media
+Radarr → /media
+Jellyfin → /media
+Plex → /media
+```
+
+---
+
+## Bazarr kan niet verbinden met Sonarr of Radarr
+
+Controleer of de containers allemaal verbonden zijn met:
+
+```text
+media_network
+```
+
+Omdat ze hetzelfde Docker-netwerk gebruiken, kunnen ze elkaar bereiken via hun containernamen.
+
+Gebruik bijvoorbeeld:
+
+```text
+http://sonarr:8989
+```
+
+voor Sonarr en:
+
+```text
+http://radarr:7878
+```
+
+voor Radarr.
+
+Controleer ook of je de juiste API-keys hebt ingevoerd.
+
+---
+
+## Bazarr downloadt geen ondertitels
+
+Controleer in Bazarr:
+
+1. Of Sonarr en/of Radarr correct verbonden zijn.
+2. Of de API-keys correct zijn.
+3. Of minstens één subtitle provider geconfigureerd is.
+4. Of de gewenste talen geconfigureerd zijn.
+5. Of Bazarr toegang heeft tot `/media`.
+6. Of de gebruiker waarmee Bazarr draait schrijfrechten heeft op de mediamap.
+7. Of de bestaande media correct door Sonarr/Radarr worden herkend.
+
+---
+
+## Containerconfiguratie verdwenen
+
+Controleer of de configuratiemappen naar een persistente locatie verwijzen:
+
+```text
+/DATA/AppData
+```
+
+Bijvoorbeeld voor Bazarr:
+
+```text
+/DATA/AppData/bazarr/config
+```
+
+Bewaar belangrijke configuratie nooit uitsluitend binnen het tijdelijke container-filesystem.
 
 ---
 
