@@ -1204,13 +1204,29 @@ Er zijn drie manieren om de mediaserver te installeren:
 
 Deze methode is ideaal wanneer je de **volledige mediaserver in één keer** wilt installeren.
 
+De Compose-stack bevat alle onderdelen van de mediaserver, waaronder:
+
+* Jellyfin
+* Plex
+* Jellystat
+* PostgreSQL
+* Tautulli
+* Seerr
+* Radarr
+* Sonarr
+* Bazarr
+* Prowlarr
+* Transmission
+
+De Compose-file maakt gebruik van environment variables, waardoor je de YAML-code zelf niet hoeft aan te passen.
+
 ### 1. Open het Compose-bestand
 
 **[Bekijk `mediaserver-compose-template.yaml`](https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-compose-template.yaml)**
 
 ### 2. Kopieer de volledige inhoud
 
-Kopieer de volledige YAML-configuratie.
+Kopieer de volledige inhoud van het YAML-bestand.
 
 ### 3. Open Portainer
 
@@ -1230,52 +1246,56 @@ Geef de Stack bijvoorbeeld de naam:
 media-stack
 ```
 
-Plak vervolgens de YAML in de **Web Editor**.
+Plak vervolgens de gekopieerde YAML-code in de **Web Editor**.
 
 ### 5. Stel Environment Variables in
 
-Belangrijke variabelen zijn:
+Scroll naar beneden naar **Environment variables** en klik op **Add environment variable**.
 
-```text
-APPDATA_DIR
-MEDIA_DIR
-DATA_DIR
-POSTGRES_USER
-POSTGRES_PASSWORD
-JWT_SECRET
-PLEX_CLAIM
-PUID
-PGID
-TZ
-```
+De belangrijkste variabelen zijn:
 
-Bijvoorbeeld:
+| Variabele           | Beschrijving                         | Voorbeeld                      |
+| ------------------- | ------------------------------------ | ------------------------------ |
+| `APPDATA_DIR`       | Locatie van configuratiemappen       | `/DATA/AppData`                |
+| `MEDIA_DIR`         | Locatie van de mediamap              | `/mnt/media_storage/Media`     |
+| `DATA_DIR`          | Hoofdmap voor downloads/data         | `/DATA`                        |
+| `POSTGRES_USER`     | PostgreSQL-gebruikersnaam            | `postgres`                     |
+| `POSTGRES_PASSWORD` | PostgreSQL-wachtwoord voor Jellystat | `Gebruik-een-sterk-wachtwoord` |
+| `JWT_SECRET`        | Secret voor Jellystat                | Willekeurige lange string      |
+| `PLEX_CLAIM`        | Plex claim token                     | `claim-xxxxxxxx`               |
+| `PUID`              | Linux User ID                        | `1000`                         |
+| `PGID`              | Linux Group ID                       | `1000`                         |
+| `TZ`                | Tijdzone                             | `Europe/Brussels`              |
 
-```text
+Voor een typische Linux-server kun je bijvoorbeeld gebruiken:
+
+```dotenv
 APPDATA_DIR=/DATA/AppData
 MEDIA_DIR=/mnt/media_storage/Media
 DATA_DIR=/DATA
+
 POSTGRES_USER=postgres
+POSTGRES_PASSWORD=Gebruik-Hier-Een-Sterk-Wachtwoord
+JWT_SECRET=een-lange-willekeurige-geheime-string
+
 PUID=1000
 PGID=1000
 TZ=Europe/Brussels
 ```
 
-Bazarr gebruikt automatisch:
+Voor Plex genereer je een **nieuwe claim token** via:
 
-```text
-${APPDATA_DIR}/bazarr/config
+**[plex.tv/claim](https://www.plex.tv/claim/)**
+
+Vul deze in als:
+
+```dotenv
+PLEX_CLAIM=claim-xxxxxxxxxxxxxxxx
 ```
 
-voor zijn configuratie en:
+> **Let op:** een Plex claim token is tijdelijk geldig. Genereer de token daarom vlak voordat je de stack deployt.
 
-```text
-${MEDIA_DIR}:/media
-```
-
-voor toegang tot de mediamap.
-
-### 6. Deploy
+### 6. Deploy de Stack
 
 Klik op:
 
@@ -1283,13 +1303,305 @@ Klik op:
 Deploy the stack
 ```
 
-De volledige stack wordt vervolgens aangemaakt, inclusief Bazarr.
+Portainer zal vervolgens alle containers aanmaken.
+
+Bazarr wordt hierbij automatisch als onderdeel van de stack geïnstalleerd.
+
+---
+
+# 💻 Methode 2: Docker Desktop — Windows / macOS
+
+Gebruik deze methode wanneer je Docker via **Docker Desktop** gebruikt en de stack niet via Portainer wilt beheren.
+
+In plaats van de environment variables in Portainer in te vullen, gebruik je een `.env` bestand.
+
+## 1. Plaats het Compose-bestand
+
+Download of kopieer:
+
+```text
+mediaserver-compose-template.yaml
+```
+
+naar een map op je computer.
+
+Je kunt het bestand bijvoorbeeld hernoemen naar:
+
+```text
+docker-compose.yaml
+```
+
+Je map ziet er vervolgens bijvoorbeeld zo uit:
+
+```text
+media-server/
+├── docker-compose.yaml
+└── .env
+```
+
+## 2. Maak een `.env` bestand
+
+Maak in dezelfde map een nieuw tekstbestand met exact de naam:
+
+```text
+.env
+```
+
+> **Let op:** zorg ervoor dat Windows het bestand niet automatisch opslaat als `.env.txt`.
+
+## 3. Voeg je configuratie toe
+
+Voorbeeld voor Windows:
+
+```dotenv
+APPDATA_DIR=C:\Docker\AppData
+MEDIA_DIR=D:\Media
+DATA_DIR=D:\Downloads
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=MijnVeiligWachtwoord123
+JWT_SECRET=een-lange-willekeurige-geheime-string
+PLEX_CLAIM=claim-xxxxxxxxx
+
+PUID=1000
+PGID=1000
+TZ=Europe/Brussels
+```
+
+Op macOS kun je bijvoorbeeld gebruiken:
+
+```dotenv
+APPDATA_DIR=/Users/username/Docker/AppData
+MEDIA_DIR=/Volumes/Media/Media
+DATA_DIR=/Volumes/Media/Data
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=MijnVeiligWachtwoord123
+JWT_SECRET=een-lange-willekeurige-geheime-string
+PLEX_CLAIM=claim-xxxxxxxxx
+
+PUID=1000
+PGID=1000
+TZ=Europe/Brussels
+```
+
+> **Belangrijk:** de exacte paden zijn afhankelijk van waar je Docker-data en media op je computer staan.
+
+### 4. Open een terminal
+
+Open een terminal of opdrachtprompt in de map waarin je `docker-compose.yaml` en `.env` staan.
+
+Bijvoorbeeld:
+
+```bash
+cd /path/to/media-server
+```
+
+Op Windows kan dit bijvoorbeeld zijn:
+
+```powershell
+cd C:\Docker\media-server
+```
+
+### 5. Controleer de Compose-configuratie
+
+Je kunt eerst controleren of Docker Compose de configuratie correct kan verwerken:
+
+```bash
+docker compose config
+```
+
+Als er geen configuratiefouten worden weergegeven, kun je de stack starten.
+
+### 6. Start de mediaserver
+
+Voer uit:
+
+```bash
+docker compose up -d
+```
+
+Docker zal nu de benodigde images downloaden en de containers starten.
+
+### 7. Controleer de containers
+
+Gebruik:
+
+```bash
+docker compose ps
+```
+
+Je zou vervolgens de verschillende containers moeten zien, waaronder:
+
+```text
+jellyfin
+plex
+jellystat-db
+jellystat
+tautulli
+radarr
+sonarr
+bazarr
+seerr
+prowlarr
+transmission
+```
+
+### 8. Logs bekijken
+
+Wanneer een container problemen geeft, kun je de logs bekijken met:
+
+```bash
+docker compose logs
+```
+
+Voor één specifieke container:
+
+```bash
+docker compose logs bazarr
+```
+
+Of bijvoorbeeld:
+
+```bash
+docker compose logs sonarr
+```
+
+### 🔐 Belangrijk: `.env` niet uploaden naar GitHub
+
+Je `.env` bestand kan gevoelige informatie bevatten, zoals:
+
+* PostgreSQL-wachtwoord
+* JWT secret
+* Plex claim token
+* API keys
+
+Voeg daarom `.env` toe aan `.gitignore`:
+
+```gitignore
+.env
+```
+
+---
+
+# 🧩 Methode 3: Portainer App Templates — Losse applicaties
+
+Gebruik deze methode wanneer je niet de volledige mediaserver wilt installeren, maar individuele applicaties één voor één wilt deployen.
+
+Dit is bijvoorbeeld handig wanneer je alleen:
+
+* Jellyfin
+* Sonarr
+* Radarr
+* Bazarr
+* Prowlarr
+* Transmission
+
+of een andere specifieke applicatie wilt installeren.
+
+## 1. Open Portainer
+
+Ga naar:
+
+```text
+Portainer
+→ Settings
+→ App Templates
+```
+
+## 2. Gebruik Custom Templates
+
+Zoek naar de optie:
+
+```text
+Use custom templates
+```
+
+Schakel deze optie in.
+
+## 3. Voeg de template-URL toe
+
+Gebruik de volgende URL:
+
+```text
+https://raw.githubusercontent.com/runeverstraeten/ready-to-use-media-server-portainer-template/refs/heads/main/templates/mediaserver-template.json
+```
+
+Plak deze URL in het daarvoor bestemde **URL**-veld.
+
+## 4. Sla de instellingen op
+
+Klik op:
+
+```text
+Save Settings
+```
+
+## 5. Open App Templates
+
+Ga vervolgens naar:
+
+```text
+Portainer
+→ App Templates
+```
+
+Je zou nu de templates uit deze repository moeten zien.
+
+Je kunt vervolgens een individuele applicatie selecteren en installeren.
+
+### 📦 Beschikbare applicaties
+
+Afhankelijk van de huidige inhoud van `mediaserver-template.json` kunnen onder andere de volgende applicaties beschikbaar zijn:
+
+* Jellyfin
+* Plex
+* Jellystat
+* Tautulli
+* Seerr
+* Radarr
+* Sonarr
+* Bazarr
+* Prowlarr
+* Transmission
+
+### 💬 Bazarr afzonderlijk installeren
+
+Wanneer je alleen Bazarr wilt gebruiken, kun je deze via de App Templates afzonderlijk installeren.
+
+Bazarr gebruikt:
+
+```text
+Configuratie:
+/DATA/AppData/bazarr/config
+```
+
+en:
+
+```text
+Media:
+/mnt/media_storage/Media
+```
+
+of de paden die je via de environment variables instelt.
+
+De standaard webinterface van Bazarr is beschikbaar via:
+
+```text
+http://YOUR-SERVER-IP:6767
+```
+
+Bijvoorbeeld:
+
+```text
+http://192.168.0.2:6767
+```
 
 ---
 
 # 💬 Bazarr — Ondertiteling
 
-**Bazarr** is verantwoordelijk voor het automatisch beheren en downloaden van ondertitels voor films en series.
+**Bazarr** is verantwoordelijk voor het automatisch beheren en downloaden van ondertitels voor films en TV-series.
 
 Bazarr werkt samen met:
 
@@ -1303,7 +1615,7 @@ Bazarr kan:
 * automatisch ontbrekende ondertitels zoeken;
 * ondertitels downloaden;
 * ondertitels voor films beheren;
-* ondertitels voor afleveringen beheren;
+* ondertitels voor TV-afleveringen beheren;
 * integreren met Sonarr;
 * integreren met Radarr;
 * verschillende subtitle providers gebruiken;
@@ -1314,13 +1626,13 @@ Bazarr kan:
 De configuratie wordt opgeslagen in:
 
 ```text
-/DATA/AppData/bazarr/config
+${APPDATA_DIR}/bazarr/config
 ```
 
 De mediamap wordt gemount als:
 
 ```text
-/media
+${MEDIA_DIR}:/media
 ```
 
 Bazarr is standaard bereikbaar via:
@@ -1351,7 +1663,9 @@ Settings
 → Radarr
 ```
 
-Gebruik hierbij de Docker-servicenamen wanneer de containers op hetzelfde Docker-netwerk staan:
+Omdat de containers allemaal onderdeel zijn van hetzelfde Docker-netwerk `media_network`, kunnen ze elkaar rechtstreeks bereiken via hun containernamen.
+
+Gebruik bijvoorbeeld:
 
 ```text
 Sonarr:
@@ -1376,10 +1690,22 @@ Een aanbevolen structuur is:
 ```text
 /DATA/
 ├── AppData/
+│   ├── jellyfin/
+│   ├── plex/
+│   ├── jellystat/
+│   ├── tautulli/
+│   ├── radarr/
+│   ├── sonarr/
+│   ├── bazarr/
+│   ├── seerr/
+│   ├── prowlarr/
+│   └── transmission/
+│
 ├── Downloads/
 │   └── torrents/
 │       ├── movies/
 │       └── tv/
+│
 └── Media/
     ├── Movies/
     └── TV Shows/
@@ -1399,14 +1725,14 @@ Hierdoor wordt onnodig dubbel opslaggebruik voorkomen.
 
 ### Container-mounts
 
-| Container    | Data/Downloads | Media    |
-| ------------ | -------------- | -------- |
-| Transmission | `/data`        | `/media` |
-| Radarr       | `/data`        | `/media` |
-| Sonarr       | `/data`        | `/media` |
-| Bazarr       | —              | `/media` |
-| Jellyfin     | —              | `/media` |
-| Plex         | —              | `/media` |
+| Container    | Data / Downloads | Media    |
+| ------------ | ---------------- | -------- |
+| Transmission | `/data`          | `/media` |
+| Radarr       | `/data`          | `/media` |
+| Sonarr       | `/data`          | `/media` |
+| Bazarr       | —                | `/media` |
+| Jellyfin     | —                | `/media` |
+| Plex         | —                | `/media` |
 
 Door dezelfde `/media`-structuur te gebruiken in de verschillende containers worden padproblemen tussen Radarr, Sonarr, Bazarr, Jellyfin en Plex zoveel mogelijk voorkomen.
 
@@ -1416,29 +1742,46 @@ Door dezelfde `/media`-structuur te gebruiken in de verschillende containers wor
 
 Omdat de configuratie buiten de containers wordt opgeslagen, kunnen containers opnieuw worden aangemaakt zonder hun configuratie te verliezen.
 
-In Portainer kun je bij het opnieuw aanmaken kiezen voor:
+## Portainer
+
+Bij het opnieuw aanmaken van een container of Stack kun je:
 
 ```text
 Recreate
 ```
 
-en:
+gebruiken en:
 
 ```text
 Pull latest image
 ```
 
-Bij Docker Compose:
+inschakelen.
+
+## Docker Compose
+
+Download eerst de nieuwste images:
 
 ```bash
 docker compose pull
+```
+
+Start vervolgens de containers opnieuw:
+
+```bash
 docker compose up -d
 ```
 
-Controleer daarna de containers:
+Controleer daarna:
 
 ```bash
 docker compose ps
+```
+
+Om logs van een specifieke container te bekijken:
+
+```bash
+docker compose logs -f bazarr
 ```
 
 ---
@@ -1454,7 +1797,7 @@ Dit omvat onder andere:
 * Plex claim tokens
 * API keys
 * Access tokens
-* Gebruikersnamen/wachtwoorden
+* Gebruikersnamen en wachtwoorden
 
 Wanneer je Docker Desktop gebruikt, bewaar deze informatie in `.env` en voeg `.env` toe aan `.gitignore`:
 
@@ -1525,11 +1868,11 @@ Controleer daarnaast of Sonarr en Radarr dezelfde `/media`-structuur gebruiken.
 Aanbevolen:
 
 ```text
-Bazarr → /media
-Sonarr → /media
-Radarr → /media
+Bazarr   → /media
+Sonarr   → /media
+Radarr   → /media
 Jellyfin → /media
-Plex → /media
+Plex     → /media
 ```
 
 ---
@@ -1571,7 +1914,7 @@ Controleer in Bazarr:
 3. Of minstens één subtitle provider geconfigureerd is.
 4. Of de gewenste talen geconfigureerd zijn.
 5. Of Bazarr toegang heeft tot `/media`.
-6. Of de gebruiker waarmee Bazarr draait schrijfrechten heeft op de mediamap.
+6. Of Bazarr schrijfrechten heeft op de mediamap.
 7. Of de bestaande media correct door Sonarr/Radarr worden herkend.
 
 ---
@@ -1591,27 +1934,3 @@ Bijvoorbeeld voor Bazarr:
 ```
 
 Bewaar belangrijke configuratie nooit uitsluitend binnen het tijdelijke container-filesystem.
-
----
-
-# 🤝 Contributing
-
-Pull requests, verbeteringen en suggesties zijn welkom.
-
-Wanneer je een verbetering wilt voorstellen:
-
-1. Fork deze repository.
-2. Maak een nieuwe branch.
-3. Maak je wijzigingen.
-4. Test de wijzigingen.
-5. Maak een Pull Request.
-
----
-
-# 📄 License
-
-This project is provided as-is for personal and self-hosted use.
-
-Please review the individual licenses and terms of use of the Docker images and applications included in this repository.
-
-The applications themselves are **not owned or distributed by this repository**. This repository provides deployment templates and configuration examples for those applications.
