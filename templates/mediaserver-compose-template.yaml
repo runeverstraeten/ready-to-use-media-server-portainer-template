@@ -1,120 +1,382 @@
-version: "3.9"
+version: "3.8"
+
+networks:
+  media_network:
+    name: media_network
+    driver: bridge
 
 services:
-  # --- Media Server ---
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=\({PGID:-1000}       - TZ=\){TZ:-Europe/Brussels}
+      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/jellyfin/config:/config
+      - ${APPDATA_DIR:-/DATA/AppData}/jellyfin/cache:/cache
+      - ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
+      - ${APPDATA_DIR:-/DATA/AppData}/jellyfin/epg:/epg:ro
+    ports:
+      - 8096:8096
+      - 8920:8920
+      - 7359:7359/udp
+      - 1900:1900/udp
+    devices:
+      - /dev/dri:/dev/dri # Hardware acceleration actief
+    shm_size: "1gb" # Voor transcoding sessies
+    networks:
+      - media_network
+    restart: unless-stopped
+
   plex:
-    image: lscr.io/linuxserver/plex:latest
+    image: plexinc/pms-docker:latest
     container_name: plex
-    ports:        
-      - 32400:32400
+    network_mode: host
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
-      - VERSION=docker
+      - TZ=${TZ:-Europe/Brussels}
+      - PLEX_UID=${PUID:-1000}
+      - PLEX_GID=\({PGID:-1000}       - PLEX_CLAIM=\){PLEX_CLAIM:-claim-uBnaaCcvJk9S6c8U6-Gp}
     volumes:
-      - ./config/plex:/config
-      - ./media:/media # Verwijs dit naar je hoofd mediamap
+      - ${APPDATA_DIR:-/DATA/AppData}/plex/config:/config
+      - ${APPDATA_DIR:-/DATA/AppData}/plex/transcode:/transcode
+      - ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
+    devices:
+      - /dev/dri:/dev/dri # Hardware acceleration actief
     restart: unless-stopped
 
-  # --- Monitoring & Requests ---
-  overseerr:
-    image: lscr.io/linuxserver/overseerr:latest
-    container_name: overseerr
+  jellystat-db:
+    image: postgres:15
+    container_name: jellystat-db
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-VulHierEenSterkWachtwoordIn}
     volumes:
-      - ./config/overseerr:/config
+      - ${APPDATA_DIR:-/DATA/AppData}/jellystat/postgres:/var/lib/postgresql/data
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=\({POSTGRES_USER:-postgres} --username=\){POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  jellystat:
+    image: cyfershepard/jellystat:latest
+    container_name: jellystat
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-VulHierEenSterkWachtwoordIn}
+      POSTGRES_IP: jellystat-db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: ${JWT_SECRET:-b8a9c7f1e4d2a3b6c5d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0}
+      TZ: ${TZ:-Europe/Brussels}
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/jellystat/backup:/app/backend/backup-data
     ports:
-      - 5055:5055
+      - 3001:3000
+    depends_on:
+      jellystat-db:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000/auth/isConfigured || exit 1
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks:
+      - media_network
     restart: unless-stopped
 
-  tautulli:
-    image: lscr.io/linuxserver/tautulli:latest
-    container_name: tautulli
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
-    volumes:
-      - ./config/tautulli:/config
-    ports:
-      - 8181:8181
-    restart: unless-stopped
-
-  # --- Downloaders ---
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
+      - PUID=${PUID:-1000}
+      - PGID=\({PGID:-1000}       - TZ=\){TZ:-Europe/Brussels}
     volumes:
-      - ./config/radarr:/config
-      - ./media:/media # Toegang tot films
-      - ./downloads:/downloads # Toegang tot downloads
+      - ${APPDATA_DIR:-/DATA/AppData}/radarr/config:/config
+      - ${DATA_DIR:-/DATA}:/data
+      - ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
     ports:
       - 7878:7878
+    networks:
+      - media_network
     restart: unless-stopped
 
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
+      - PUID=${PUID:-1000}
+      - PGID=\({PGID:-1000}       - TZ=\){TZ:-Europe/Brussels}
     volumes:
-      - ./config/sonarr:/config
-      - ./media:/media # Toegang tot series
-      - ./downloads:/downloads # Toegang tot downloads
+      - ${APPDATA_DIR:-/DATA/AppData}/sonarr/config:/config
+      - ${DATA_DIR:-/DATA}:/data
+      - ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
     ports:
       - 8989:8989
+    networks:
+      - media_network
     restart: unless-stopped
 
-  bazarr:
-    image: lscr.io/linuxserver/bazarr:latest
-    container_name: bazarr
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    init: true
+    user: "\({PUID:-1000}:\){PGID:-1000}"
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
-    volumes:
-      - ./config/bazarr:/config
-      - ./media:/media # Nodig om ondertitels bij bestanden te zetten
+      - LOG_LEVEL=debug
+      - TZ=${TZ:-Europe/Brussels}
+      - PORT=5055
     ports:
-      - 6767:6767
+      - 5055:5055
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/seerr/config:/app/config
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  prowlarr:
+    image: ghcr.io/hotio/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=\({PGID:-1000}       - UMASK=002       - TZ=\){TZ:-Europe/Brussels}
+      - WEBUI_PORTS=9696/tcp 
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/prowlarr/config:/config
+    ports:
+      - 9696:9696
+    networks:
+      - media_network
     restart: unless-stopped
 
   transmission:
     image: lscr.io/linuxserver/transmission:latest
     container_name: transmission
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
+      - PUID=${PUID:-1000}
+      - PGID=\({PGID:-1000}       - TZ=\){TZ:-Europe/Brussels}
     volumes:
-      - ./config/transmission:/config
-      - ./downloads:/downloads
-      - ./watch:/watch
+      - ${APPDATA_DIR:-/DATA/AppData}/transmission/config:/config
+      - ${DATAHier is de geüpdatete Docker Compose template, inclusief Plex. 
+
+Ik heb de configuratie voor Plex in dezelfde sjabloonstijl gegoten (met `${VARIABELE:-standaardwaarde}`) en de volumes gelijkgetrokken. Let op: Plex maakt gebruik van `network_mode: host` (zoals in je voorbeeld), wat de standaard en aanbevolen manier is voor Plex zodat lokale netwerkdetectie (DLNA en casten) goed werkt. Hierdoor heeft Plex geen `ports`-sectie en hoeft het niet in het `media_network` te zitten.
+
+```yaml
+version: "3.8"
+
+networks:
+  media_network:
+    name: media_network
+    driver: bridge
+
+services:
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Europe/Brussels}
+      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/jellyfin/config:/config
+      - ${APPDATA_DIR:-/DATA/AppData}/jellyfin/cache:/cache
+      - ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
+      - ${APPDATA_DIR:-/DATA/AppData}/jellyfin/epg:/epg:ro
+    ports:
+      - 8096:8096
+      - 8920:8920
+      - 7359:7359/udp
+      - 1900:1900/udp
+    devices:
+      - /dev/dri:/dev/dri # Hardware acceleration actief
+    shm_size: "1gb" # Voor transcoding sessies
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  plex:
+    image: plexinc/pms-docker:latest
+    container_name: plex
+    network_mode: host
+    environment:
+      - TZ=${TZ:-Europe/Brussels}
+      - PLEX_UID=${PUID:-1000}
+      - PLEX_GID=${PGID:-1000}
+      # PLEX_CLAIM verloopt meestal na 4 minuten. Vul een verse in via Portainer variables bij een nieuwe deploy.
+      - PLEX_CLAIM=${PLEX_CLAIM:-claim-uBnaaCcvJk9S6c8U6-Gp}
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/plex/config:/config
+      - ${APPDATA_DIR:-/DATA/AppData}/plex/transcode:/transcode
+      - ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
+    devices:
+      - /dev/dri:/dev/dri
+    restart: unless-stopped
+
+  jellystat-db:
+    image: postgres:15
+    container_name: jellystat-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-VulHierEenSterkWachtwoordIn}
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/jellystat/postgres:/var/lib/postgresql/data
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready --dbname=\({POSTGRES_USER:-postgres} --username=\){POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  jellystat:
+    image: cyfershepard/jellystat:latest
+    container_name: jellystat
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-VulHierEenSterkWachtwoordIn}
+      POSTGRES_IP: jellystat-db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: ${JWT_SECRET:-b8a9c7f1e4d2a3b6c5d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0}
+      TZ: ${TZ:-Europe/Brussels}
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/jellystat/backup:/app/backend/backup-data
+    ports:
+      - 3001:3000
+    depends_on:
+      jellystat-db:
+        condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "5"
+        max-size: "10m"
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000/auth/isConfigured || exit 1
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Europe/Brussels}
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/radarr/config:/config
+      - ${DATA_DIR:-/DATA}:/data
+      - ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
+    ports:
+      - 7878:7878
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Europe/Brussels}
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/sonarr/config:/config
+      - ${DATA_DIR:-/DATA}:/data
+      - ${MEDIA_DIR:-/mnt/media_storage/Media}:/media
+    ports:
+      - 8989:8989
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  seerr:
+    image: ghcr.io/seerr-team/seerr:latest
+    container_name: seerr
+    init: true
+    user: "\({PUID:-1000}:\){PGID:-1000}"
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=${TZ:-Europe/Brussels}
+      - PORT=5055
+    ports:
+      - 5055:5055
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/seerr/config:/app/config
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  prowlarr:
+    image: ghcr.io/hotio/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - UMASK=002
+      - TZ=${TZ:-Europe/Brussels}
+      - WEBUI_PORTS=9696/tcp 
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/prowlarr/config:/config
+    ports:
+      - 9696:9696
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    container_name: transmission
+    environment:
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+      - TZ=${TZ:-Europe/Brussels}
+    volumes:
+      - ${APPDATA_DIR:-/DATA/AppData}/transmission/config:/config
+      - ${DATA_DIR:-/DATA}:/data
+      - ${MEDIA_DIR:-/mnt/media_storage/Media}:/media 
     ports:
       - 9091:9091
       - 51413:51413
       - 51413:51413/udp
-    restart: unless-stopped
-
-  jackett:
-    image: lscr.io/linuxserver/jackett:latest
-    container_name: jackett
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Brussels
-    volumes:
-      - ./config/jackett:/config
-    ports:
-      - 9117:9117
+    networks:
+      - media_network
     restart: unless-stopped
