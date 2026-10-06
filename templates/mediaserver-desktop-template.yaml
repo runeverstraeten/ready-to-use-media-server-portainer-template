@@ -6,6 +6,7 @@ networks:
     driver: bridge
 
 services:
+
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
@@ -20,13 +21,14 @@ services:
       - ${MEDIA_DIR}:/media
       - ${APPDATA_DIR}/jellyfin/epg:/epg:ro
     ports:
-      - 8096:8096
-      - 8920:8920
-      - 7359:7359/udp
-      - 1900:1900/udp
+      - "8096:8096"
+      - "8920:8920"
+      - "7359:7359/udp"
+      - "1900:1900/udp"
     # devices:
-    #   - /dev/dri:/dev/dri # Uitgeschakeld voor Docker Desktop (Windows/Mac)
-    shm_size: "1gb" # Voor transcoding sessies
+    #   - /dev/dri:/dev/dri
+    # Uitgeschakeld voor Docker Desktop (Windows/Mac)
+    shm_size: "1gb"
     networks:
       - media_network
     restart: unless-stopped
@@ -34,7 +36,8 @@ services:
   plex:
     image: plexinc/pms-docker:latest
     container_name: plex
-    # network_mode: host werkt niet op Docker Desktop; we mappen de poorten direct.
+    # network_mode: host werkt niet op Docker Desktop;
+    # daarom worden de poorten direct gemapt.
     environment:
       - TZ=${TZ}
       - PLEX_UID=${PUID}
@@ -45,17 +48,18 @@ services:
       - ${APPDATA_DIR}/plex/transcode:/transcode
       - ${MEDIA_DIR}:/media
     ports:
-      - 32400:32400/tcp
-      - 3005:3005/tcp
-      - 8324:8324/tcp
-      - 32469:32469/tcp
-      - 1900:1900/udp
-      - 32410:32410/udp
-      - 32412:32412/udp
-      - 32413:32413/udp
-      - 32414:32414/udp
+      - "32400:32400/tcp"
+      - "3005:3005/tcp"
+      - "8324:8324/tcp"
+      - "32469:32469/tcp"
+      - "1900:1900/udp"
+      - "32410:32410/udp"
+      - "32412:32412/udp"
+      - "32413:32413/udp"
+      - "32414:32414/udp"
     # devices:
-    #   - /dev/dri:/dev/dri # Uitgeschakeld voor Docker Desktop (Windows/Mac)
+    #   - /dev/dri:/dev/dri
+    # Uitgeschakeld voor Docker Desktop (Windows/Mac)
     networks:
       - media_network
     restart: unless-stopped
@@ -70,7 +74,7 @@ services:
     volumes:
       - ${APPDATA_DIR}/tautulli/config:/config
     ports:
-      - 8181:8181
+      - "8181:8181"
     networks:
       - media_network
     restart: unless-stopped
@@ -89,7 +93,11 @@ services:
         max-file: "5"
         max-size: "10m"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready --dbname=\({POSTGRES_USER} --username=\){POSTGRES_USER}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready --dbname=${POSTGRES_USER} --username=${POSTGRES_USER}"
+        ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -110,7 +118,7 @@ services:
     volumes:
       - ${APPDATA_DIR}/jellystat/backup:/app/backend/backup-data
     ports:
-      - 3001:3000
+      - "3001:3000"
     depends_on:
       jellystat-db:
         condition: service_healthy
@@ -120,7 +128,11 @@ services:
         max-file: "5"
         max-size: "10m"
     healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:3000/auth/isConfigured || exit 1
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:3000/auth/isConfigured || exit 1"
+        ]
       interval: 60s
       timeout: 30s
       retries: 5
@@ -141,7 +153,7 @@ services:
       - ${DATA_DIR}:/data
       - ${MEDIA_DIR}:/media
     ports:
-      - 7878:7878
+      - "7878:7878"
     networks:
       - media_network
     restart: unless-stopped
@@ -158,7 +170,7 @@ services:
       - ${DATA_DIR}:/data
       - ${MEDIA_DIR}:/media
     ports:
-      - 8989:8989
+      - "8989:8989"
     networks:
       - media_network
     restart: unless-stopped
@@ -174,7 +186,7 @@ services:
       - ${APPDATA_DIR}/bazarr/config:/config
       - ${MEDIA_DIR}:/media
     ports:
-      - 6767:6767
+      - "6767:6767"
     networks:
       - media_network
     restart: unless-stopped
@@ -183,17 +195,21 @@ services:
     image: ghcr.io/seerr-team/seerr:latest
     container_name: seerr
     init: true
-    user: "\({PUID}:\){PGID}"
+    user: "${PUID}:${PGID}"
     environment:
       - LOG_LEVEL=debug
       - TZ=${TZ}
       - PORT=5055
     ports:
-      - 5055:5055
+      - "5055:5055"
     volumes:
       - ${APPDATA_DIR}/seerr/config:/app/config
     healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      test:
+        [
+          "CMD-SHELL",
+          "wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1"
+        ]
       start_period: 20s
       timeout: 3s
       interval: 15s
@@ -210,11 +226,11 @@ services:
       - PGID=${PGID}
       - UMASK=002
       - TZ=${TZ}
-      - WEBUI_PORTS=9696/tcp 
+      - WEBUI_PORTS=9696/tcp
     volumes:
       - ${APPDATA_DIR}/prowlarr/config:/config
     ports:
-      - 9696:9696
+      - "9696:9696"
     networks:
       - media_network
     restart: unless-stopped
@@ -229,11 +245,43 @@ services:
     volumes:
       - ${APPDATA_DIR}/transmission/config:/config
       - ${DATA_DIR}:/data
-      - ${MEDIA_DIR}:/media 
+      - ${MEDIA_DIR}:/media
     ports:
-      - 9091:9091
-      - 51413:51413
-      - 51413:51413/udp
+      - "9091:9091"
+      - "51413:51413"
+      - "51413:51413/udp"
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCHA_SOLVER=none
+      - TZ=${TZ}
+    ports:
+      - "8191:8191"
+    volumes:
+      - ${APPDATA_DIR}/flaresolverr/config:/config
+    networks:
+      - media_network
+    restart: unless-stopped
+
+  portainer:
+    image: portainer/portainer-ce:lts
+    container_name: portainer
+    environment:
+      - TZ=${TZ}
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+      - "9443:9443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${APPDATA_DIR}/portainer/data:/data
     networks:
       - media_network
     restart: unless-stopped
