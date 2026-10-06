@@ -24,8 +24,8 @@ services:
       - 8920:8920
       - 7359:7359/udp
       - 1900:1900/udp
-    devices:
-      - /dev/dri:/dev/dri # Hardware acceleration actief
+    # devices:
+    #   - /dev/dri:/dev/dri # Uitgeschakeld voor Docker Desktop (Windows/Mac)
     shm_size: "1gb" # Voor transcoding sessies
     networks:
       - media_network
@@ -34,7 +34,7 @@ services:
   plex:
     image: plexinc/pms-docker:latest
     container_name: plex
-    network_mode: host
+    # network_mode: host werkt niet op Docker Desktop; we mappen de poorten direct.
     environment:
       - TZ=${TZ}
       - PLEX_UID=${PUID}
@@ -44,8 +44,20 @@ services:
       - ${APPDATA_DIR}/plex/config:/config
       - ${APPDATA_DIR}/plex/transcode:/transcode
       - ${MEDIA_DIR}:/media
-    devices:
-      - /dev/dri:/dev/dri
+    ports:
+      - 32400:32400/tcp
+      - 3005:3005/tcp
+      - 8324:8324/tcp
+      - 32469:32469/tcp
+      - 1900:1900/udp
+      - 32410:32410/udp
+      - 32412:32412/udp
+      - 32413:32413/udp
+      - 32414:32414/udp
+    # devices:
+    #   - /dev/dri:/dev/dri # Uitgeschakeld voor Docker Desktop (Windows/Mac)
+    networks:
+      - media_network
     restart: unless-stopped
 
   tautulli:
