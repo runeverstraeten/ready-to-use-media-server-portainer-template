@@ -1,189 +1,86 @@
-[
+{
+  "version": "2",
+  "templates": [
     {
-        "type": 1,
-        "title": "Plex Media Server",
-        "name": "plex",
-        "description": "Transform your home into a cinematic oasis with your very own media server. Stream Movies & TV Shows.",
-        "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Plex/icon.png",
-        "image": "lscr.io/linuxserver/plex:latest",
-        "categories": ["Media"],
-        "platform": "linux",
-        "restart_policy": "unless-stopped",
-        "network": "host",
-        "env": [
-            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
-            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
-            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" },
-            { "name": "VERSION", "label": "Version", "default": "docker", "description": "Docker or latest" }
-        ],
-        "volumes": [
-            { "container": "/config", "bind": "/path/to/plex/config", "label": "Config Path" },
-            { "container": "/media", "bind": "/path/to/media", "label": "Media Path" }
-        ],
-        "note": "Plex draait in 'Host' netwerk modus voor de beste DLNA/Discovery werking. Poort mapping is hierdoor niet nodig."
-    },
-    {
-        "type": 1,
-        "title": "Overseerr",
-        "name": "overseerr",
-        "description": "Overseerr is a free and open source software application for managing requests for your media library. It integrates with your existing services, such as Sonarr, Radarr, and Plex!",
-        "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Overseerr/icon.png",
-        "image": "lscr.io/linuxserver/overseerr:latest",
-        "categories": ["Media", "Requests"],
-        "platform": "linux",
-        "restart_policy": "unless-stopped",
-        "ports": [
-            "5055/tcp"
-        ],
-        "env": [
-            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
-            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
-            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
-        ],
-        "volumes": [
-            { "container": "/config", "bind": "/path/to/overseerr/config", "label": "Config Path" }
-        ]
-    },
-    {
-        "type": 1,
-        "title": "Tautulli",
-        "name": "tautulli",
-        "description": "Tautulli is a 3rd party application that you can run alongside your Plex Media Server to monitor activity and track various statistics.",
-        "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Tautulli/icon.png",
-        "image": "lscr.io/linuxserver/tautulli:latest",
-        "categories": ["Media", "Monitoring"],
-        "platform": "linux",
-        "restart_policy": "unless-stopped",
-        "ports": [
-            "8181/tcp"
-        ],
-        "env": [
-            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
-            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
-            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
-        ],
-        "volumes": [
-            { "container": "/config", "bind": "/path/to/tautulli/config", "label": "Config Path" }
-        ]
-    },
-    {
-        "type": 1,
-        "title": "Radarr",
-        "name": "radarr",
-        "description": "Radarr is a movie collection manager for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new movies and will interface with clients and indexers.",
-        "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Radarr/icon.png",
-        "image": "lscr.io/linuxserver/radarr:latest",
-        "categories": ["Media", "Downloaders"],
-        "platform": "linux",
-        "restart_policy": "unless-stopped",
-        "ports": [
-            "7878/tcp"
-        ],
-        "env": [
-            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
-            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
-            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
-        ],
-        "volumes": [
-            { "container": "/config", "bind": "/path/to/radarr/config", "label": "Config Path" },
-            { "container": "/media", "bind": "/path/to/media", "label": "Media Path (Movies)" },
-            { "container": "/downloads", "bind": "/path/to/downloads", "label": "Downloads Path" }
-        ]
-    },
-    {
-        "type": 1,
-        "title": "Sonarr",
-        "name": "sonarr",
-        "description": "Sonarr is a PVR for Usenet and BitTorrent users. It can monitor multiple RSS feeds for new episodes of your favorite shows and will grab, sort and rename them.",
-        "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Sonarr/icon.png",
-        "image": "lscr.io/linuxserver/sonarr:latest",
-        "categories": ["Media", "Downloaders"],
-        "platform": "linux",
-        "restart_policy": "unless-stopped",
-        "ports": [
-            "8989/tcp"
-        ],
-        "env": [
-            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
-            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
-            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
-        ],
-        "volumes": [
-            { "container": "/config", "bind": "/path/to/sonarr/config", "label": "Config Path" },
-            { "container": "/media", "bind": "/path/to/media", "label": "Media Path (TV Shows)" },
-            { "container": "/downloads", "bind": "/path/to/downloads", "label": "Downloads Path" }
-        ]
-    },
-    {
-        "type": 1,
-        "title": "Bazarr",
-        "name": "bazarr",
-        "description": "Bazarr is a companion application to Sonarr and Radarr. It manages and downloads subtitles based on your requirements.",
-        "logo": "https://raw.githubusercontent.com/linuxserver/docker-templates/master/linuxserver.io/img/bazarr-icon.png",
-        "image": "lscr.io/linuxserver/bazarr:latest",
-        "categories": ["Media", "Subtitles"],
-        "platform": "linux",
-        "restart_policy": "unless-stopped",
-        "ports": [
-            "6767/tcp"
-        ],
-        "env": [
-            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
-            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
-            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
-        ],
-        "volumes": [
-            { "container": "/config", "bind": "/path/to/bazarr/config", "label": "Config Path" },
-            { "container": "/media", "bind": "/path/to/media", "label": "Media Path" }
-        ]
-    },
-    {
-        "type": 1,
-        "title": "Transmission",
-        "name": "transmission",
-        "description": "Transmission is a fast, easy, and free BitTorrent client. It comes with a simple web interface.",
-        "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Transmission_Icon.svg/2048px-Transmission_Icon.svg.png",
-        "image": "lscr.io/linuxserver/transmission:latest",
-        "categories": ["Downloaders"],
-        "platform": "linux",
-        "restart_policy": "unless-stopped",
-        "ports": [
-            "9091/tcp",
-            "51413/tcp",
-            "51413/udp"
-        ],
-        "env": [
-            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
-            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
-            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
-        ],
-        "volumes": [
-            { "container": "/config", "bind": "/path/to/transmission/config", "label": "Config Path" },
-            { "container": "/downloads", "bind": "/path/to/downloads", "label": "Downloads Path" },
-            { "container": "/watch", "bind": "/path/to/watch", "label": "Watch Path" }
-        ]
-    },
-    {
-        "type": 1,
-        "title": "Jackett",
-        "name": "jackett",
-        "description": "Jackett works as a proxy server: it translates queries from apps (Sonarr, Radarr, etc) into tracker-site-specific http queries.",
-        "logo": "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Jackett/icon.png",
-        "image": "lscr.io/linuxserver/jackett:latest",
-        "categories": ["Downloaders", "Indexers"],
-        "platform": "linux",
-        "restart_policy": "unless-stopped",
-        "ports": [
-            "9117/tcp"
-        ],
-        "env": [
-            { "name": "PUID", "label": "PUID", "default": "1000", "description": "User ID" },
-            { "name": "PGID", "label": "PGID", "default": "1000", "description": "Group ID" },
-            { "name": "TZ", "label": "Timezone", "default": "Europe/Brussels" }
-        ],
-        "volumes": [
-            { "container": "/config", "bind": "/path/to/jackett/config", "label": "Config Path" },
-            { "container": "/downloads", "bind": "/path/to/downloads", "label": "Downloads Path" }
-        ]
+      "type": 3,
+      "title": "Ultimate Media Server Stack",
+      "description": "Een complete mediaserver stack met Jellyfin, Plex, de *arr suite, Transmission, Tautulli en Jellystat. Ideaal voor Linux en NAS systemen.",
+      "categories": ["Media", "Jellyfin", "Plex", "Torrent"],
+      "platform": "linux",
+      "logo": "https://raw.githubusercontent.com/walkxhub/Dashboard-Icons/master/png/jellyfin.png",
+      "repository": {
+        "url": "https://github.com/linuxserver/docker-jellyfin",
+        "stackfile": "docker-compose.yml"
+      },
+      "env": [
+        {
+          "name": "TZ",
+          "label": "Timezone",
+          "description": "De tijdzone voor alle containers (bijv. Europe/Brussels).",
+          "default": "Europe/Brussels"
+        },
+        {
+          "name": "PUID",
+          "label": "User ID (PUID)",
+          "description": "Linux User ID (vind met 'id'). Vaak 1000.",
+          "default": "1000"
+        },
+        {
+          "name": "PGID",
+          "label": "Group ID (PGID)",
+          "description": "Linux Group ID (vind met 'id'). Vaak 1000.",
+          "default": "1000"
+        },
+        {
+          "name": "APPDATA_DIR",
+          "label": "AppData Directory",
+          "description": "Pad naar de map waar alle configuraties worden opgeslagen.",
+          "default": "/DATA/AppData"
+        },
+        {
+          "name": "MEDIA_DIR",
+          "label": "Media Directory",
+          "description": "Pad naar de hoofdmap waar je media (films, series) staat.",
+          "default": "/mnt/media_storage/Media"
+        },
+        {
+          "name": "DATA_DIR",
+          "label": "Downloads/Data Directory",
+          "description": "Pad naar de root datamap (nodig voor hardlinks).",
+          "default": "/DATA"
+        },
+        {
+          "name": "POSTGRES_USER",
+          "label": "Jellystat DB Username",
+          "description": "Gebruikersnaam voor de PostgreSQL database van Jellystat.",
+          "default": "postgres"
+        },
+        {
+          "name": "POSTGRES_PASSWORD",
+          "label": "Jellystat DB Password",
+          "description": "Wachtwoord voor de PostgreSQL database (Maak dit sterk!).",
+          "default": "CHANGE_ME"
+        },
+        {
+          "name": "JWT_SECRET",
+          "label": "Jellystat JWT Secret",
+          "description": "Een willekeurige lange string voor Jellystat authenticatie.",
+          "default": "b8a9c7f1e4d2a3b6c5d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0"
+        },
+        {
+          "name": "PLEX_CLAIM",
+          "label": "Plex Claim Token",
+          "description": "Haal op via https://plex.tv/claim (Let op: is maar 4 minuten geldig).",
+          "default": ""
+        }
+      ],
+      "repository": {
+        "url": "https://github.com/linuxserver/docker-jellyfin",
+        "stackfile": "docker-compose.yml"
+      },
+      "note": "Let op: Plex maakt gebruik van 'network_mode: host'. Zorg ervoor dat je paden kloppen voordat je deployt.",
+      "repository": null,
+      "stack": "version: \"3.8\"\n\nnetworks:\n  media_network:\n    name: media_network\n    driver: bridge\n\nservices:\n  jellyfin:\n    image: lscr.io/linuxserver/jellyfin:latest\n    container_name: jellyfin\n    environment:\n      - PUID=\({PUID}\n      - PGID=\){PGID}\n      - TZ=\({TZ}\n      - DOCKER_MODS=linuxserver/mods:jellyfin-opencl-intel\n    volumes:\n      -\){APPDATA_DIR}/jellyfin/config:/config\n      - \({APPDATA_DIR}/jellyfin/cache:/cache\n      -\){MEDIA_DIR}:/media\n      - \({APPDATA_DIR}/jellyfin/epg:/epg:ro\n    ports:\n      - 8096:8096\n      - 8920:8920\n      - 7359:7359/udp\n      - 1900:1900/udp\n    devices:\n      - /dev/dri:/dev/dri\n    shm_size: \"1gb\"\n    networks:\n      - media_network\n    restart: unless-stopped\n\n  plex:\n    image: plexinc/pms-docker:latest\n    container_name: plex\n    network_mode: host\n    environment:\n      - TZ=\){TZ}\n      - PLEX_UID=\({PUID}\n      - PLEX_GID=\){PGID}\n      - PLEX_CLAIM=\({PLEX_CLAIM}\n    volumes:\n      -\){APPDATA_DIR}/plex/config:/config\n      - \({APPDATA_DIR}/plex/transcode:/transcode\n      -\){MEDIA_DIR}:/media\n    devices:\n      - /dev/dri:/dev/dri\n    restart: unless-stopped\n\n  tautulli:\n    image: ghcr.io/tautulli/tautulli:latest\n    container_name: tautulli\n    environment:\n      - PUID=\({PUID}\n      - PGID=\){PGID}\n      - TZ=\({TZ}\n    volumes:\n      -\){APPDATA_DIR}/tautulli/config:/config\n    ports:\n      - 8181:8181\n    networks:\n      - media_network\n    restart: unless-stopped\n\n  jellystat-db:\n    image: postgres:15\n    container_name: jellystat-db\n    environment:\n      POSTGRES_USER: \({POSTGRES_USER}\n      POSTGRES_PASSWORD:\){POSTGRES_PASSWORD}\n    volumes:\n      - \({APPDATA_DIR}/jellystat/postgres:/var/lib/postgresql/data\n    logging:\n      driver: \"json-file\"\n      options:\n        max-file: \"5\"\n        max-size: \"10m\"\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready --dbname=\){POSTGRES_USER} --username=\({POSTGRES_USER}\"]\n      interval: 10s\n      timeout: 5s\n      retries: 5\n    networks:\n      - media_network\n    restart: unless-stopped\n\n  jellystat:\n    image: cyfershepard/jellystat:latest\n    container_name: jellystat\n    environment:\n      POSTGRES_USER:\){POSTGRES_USER}\n      POSTGRES_PASSWORD: \({POSTGRES_PASSWORD}\n      POSTGRES_IP: jellystat-db\n      POSTGRES_PORT: 5432\n      JWT_SECRET:\){JWT_SECRET}\n      TZ: \({TZ}\n    volumes:\n      -\){APPDATA_DIR}/jellystat/backup:/app/backend/backup-data\n    ports:\n      - 3001:3000\n    depends_on:\n      jellystat-db:\n        condition: service_healthy\n    logging:\n      driver: \"json-file\"\n      options:\n        max-file: \"5\"\n        max-size: \"10m\"\n    healthcheck:\n      test: wget --no-verbose --tries=1 --spider http://localhost:3000/auth/isConfigured || exit 1\n      interval: 60s\n      timeout: 30s\n      retries: 5\n      start_period: 30s\n    networks:\n      - media_network\n    restart: unless-stopped\n\n  radarr:\n    image: lscr.io/linuxserver/radarr:latest\n    container_name: radarr\n    environment:\n      - PUID=\({PUID}\n      - PGID=\){PGID}\n      - TZ=\({TZ}\n    volumes:\n      -\){APPDATA_DIR}/radarr/config:/config\n      - \({DATA_DIR}:/data\n      -\){MEDIA_DIR}:/media\n    ports:\n      - 7878:7878\n    networks:\n      - media_network\n    restart: unless-stopped\n\n  sonarr:\n    image: lscr.io/linuxserver/sonarr:latest\n    container_name: sonarr\n    environment:\n      - PUID=\({PUID}\n      - PGID=\){PGID}\n      - TZ=\({TZ}\n    volumes:\n      -\){APPDATA_DIR}/sonarr/config:/config\n      - \({DATA_DIR}:/data\n      -\){MEDIA_DIR}:/media\n    ports:\n      - 8989:8989\n    networks:\n      - media_network\n    restart: unless-stopped\n\n  bazarr:\n    image: lscr.io/linuxserver/bazarr:latest\n    container_name: bazarr\n    environment:\n      - PUID=\({PUID}\n      - PGID=\){PGID}\n      - TZ=\({TZ}\n    volumes:\n      -\){APPDATA_DIR}/bazarr/config:/config\n      - \({MEDIA_DIR}:/media\n    ports:\n      - 6767:6767\n    networks:\n      - media_network\n    restart: unless-stopped\n\n  seerr:\n    image: ghcr.io/seerr-team/seerr:latest\n    container_name: seerr\n    init: true\n    user: \"\){PUID}:\({PGID}\"\n    environment:\n      - LOG_LEVEL=debug\n      - TZ=\){TZ}\n      - PORT=5055\n    ports:\n      - 5055:5055\n    volumes:\n      - \({APPDATA_DIR}/seerr/config:/app/config\n    healthcheck:\n      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1\n      start_period: 20s\n      timeout: 3s\n      interval: 15s\n      retries: 3\n    networks:\n      - media_network\n    restart: unless-stopped\n\n  prowlarr:\n    image: ghcr.io/hotio/prowlarr:latest\n    container_name: prowlarr\n    environment:\n      - PUID=\){PUID}\n      - PGID=\({PGID}\n      - UMASK=002\n      - TZ=\){TZ}\n      - WEBUI_PORTS=9696/tcp \n    volumes:\n      - \({APPDATA_DIR}/prowlarr/config:/config\n    ports:\n      - 9696:9696\n    networks:\n      - media_network\n    restart: unless-stopped\n\n  transmission:\n    image: lscr.io/linuxserver/transmission:latest\n    container_name: transmission\n    environment:\n      - PUID=\){PUID}\n      - PGID=\({PGID}\n      - TZ=\){TZ}\n    volumes:\n      - \({APPDATA_DIR}/transmission/config:/config\n      -\){DATA_DIR}:/data\n      - ${MEDIA_DIR}:/media \n    ports:\n      - 9091:9091\n      - 51413:51413\n      - 51413:51413/udp\n    networks:\n      - media_network\n    restart: unless-stopped"
     }
-]
+  ]
+}
